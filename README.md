@@ -43,6 +43,11 @@ station for its coordinates; click it to find its row. The selected row's leg is
 **Undo and redo** (Ctrl+Z, Ctrl+Y, or the arrows in the title bar) take back any change: a
 typed value, a removed row, a loaded file, an applied adjustment.
 
+**Exports.** **Coordinates CSV** gives every station and side shot, with WGS84 latitude and
+longitude on the Qatar National Grid. **Google Earth (KML)** gives the stations, side shots and the
+traverse line, to open in Google Earth or Excel to KML. The report lists the coordinates with
+their latitude and longitude too.
+
 **Step 2** shows the result against the tolerance first, with the reason when it fails, then the
 precision, error distance and direction, angular and level misclosure, area and perimeter, then
 the adjusted values. Switch between **Compass**, **Transit** and **Least squares** at the top.
@@ -53,12 +58,21 @@ the adjusted values. Switch between **Compass**, **Transit** and **Least squares
 |---|---|
 | The Angle column holds | **Bearings** (whole-circle bearing of each line, the default) or **Angles turned from the backsight**, clockwise or anticlockwise, as a field book has them. With bearings there is no angular check: the misclosure is the linear one only. |
 | Typed as | Decimal degrees, `DDD.MMSS` (`81.3127` is 81°31'27"), or gons. `81°31'27"` and `81 31 27` are read too. |
-| Scale factor | Ground distances times this give grid distances. |
+| Grid | **Qatar National Grid (QND95)**, the default for a new traverse, or a **local grid** of plane coordinates. |
+| Scale factor | On the Qatar National Grid it is **worked out from the grid**: the point scale factor of the projection at the middle of the traverse, times the height factor R / (R + h) for its mean height above the ellipsoid (typed, or the mean of the levels, else 0). Every distance is multiplied by it to give the grid distance. The working is shown under the setting, and in the report. It can be typed instead, and on a local grid it always is (1 for ground distances). |
 | Backsight | For angles: the backsight point's coordinates, or a bearing to it. |
 | Close | For a closed link: the close point's coordinates. For angles: the closing orientation and the closing angle at the close point. |
 | Tolerance | Primary, Secondary, Tertiary or your own: angular *K*″ × √n, linear precision 1 : *x*, levels *C* mm × √km. |
 | Carry levels | Adds Ht diff and Level columns; the level misclosure is checked and spread. |
 | Least squares | Standard errors of the angles and distances. |
+
+**On the Qatar National Grid** the projection and the shift to WGS84 are the same as Excel to
+KML's built-in Qatar National Grid (International 1924, origin 24°27′N 51°13′E, scale 0.99999,
+false origin 200000 E, 300000 N), so the same point gets the same latitude and longitude in both
+programs. The scale factor across Qatar runs from 0.99999 on the central meridian to about
+1.00003 near the coasts: up to 3 cm per kilometre, which is why it is worked out for you. A start
+station that cannot be in Qatar (swapped or mistyped coordinates) is pointed out, and no scale
+factor is used until it is put right.
 
 **Load the sample loop** loads a primary loop on two pillars, observed with angles, levelled,
 with two side shots. A row's **Side** can be *Point* (a traverse station) or *Side shot*: a point
@@ -128,6 +142,7 @@ open the program again.
 app/index.html            the whole program in one self-contained HTML file
 lite/                     the Windows program (Go + WebView2), installer and self-updater
 tools/check-engine.js     checks the traverse engine against known answers (node)
+tools/check-qng.js        checks the Qatar National Grid against PROJ and Excel to KML (node)
 .github/workflows/        check.yml on every push; release.yml builds and publishes on a version tag
 docs/releases/            release notes, one file per tag
 Run-in-app-window.bat     opens app/index.html in an app window, no install
@@ -141,6 +156,12 @@ the same code as the traverse engine of Excel to KML (`kml-convertor-src`, `app/
 copied unchanged. Keep the two in step: a fix to the arithmetic in one belongs in the other.
 `node tools/check-engine.js` runs it against traverses whose answers are known.
 
+**The Qatar National Grid** (`QNG`, between `QNG START` and `QNG END`) is Excel to KML's own
+projection and WGS84 shift for the Qatar National Grid, with the point scale factor and height
+factor added. `node tools/check-qng.js` checks the scale factor against PROJ, the latitude and
+longitude against Excel to KML, and a loop and a link traverse in Qatar whose ground distances
+were worked out from the true grid coordinates: each lands within 2 mm of the truth.
+
 ### Making a release
 
 The same as Excel to KML:
@@ -149,7 +170,7 @@ The same as Excel to KML:
 2. Publish a GitHub release on `main` with a tag higher than the last one, for example `v1.0.1`.
    A tag starts with `v` and has three numbers. Put the notes in `docs/releases/<tag>.md` first.
 3. The **Build and Release** workflow then:
-   - checks the traverse engine;
+   - checks the traverse engine and the Qatar National Grid;
    - stamps the version into the program and the Windows file details;
    - builds `TraversePro.exe` and the installer `TraversePro-Setup.exe`;
    - writes `latest.json` with the version and the installer's SHA-256;

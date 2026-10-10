@@ -196,6 +196,7 @@ footer { display: flex; align-items: center; gap: 12px; height: 28px; padding: 0
 .upd { background: #fff; padding: 22px 26px; width: 380px; border-radius: 14px; border-top: 4px solid var(--gold); }
 .upd h3 { margin: 0 0 8px; font-size: 15px; }
 .upd p { margin: 0; color: #444; }
+.tfoot.warn { color: var(--warn); background: var(--warnbg); }
 .toast { position: fixed; right: 16px; bottom: 40px; background: var(--navy); color: #fff; padding: 10px 14px; border-radius: 9px; border-left: 4px solid var(--gold); max-width: 460px; z-index: 60; box-shadow: 0 8px 24px rgba(0, 0, 0, .2); }
 
 @media (max-width: 1000px) {
@@ -226,6 +227,7 @@ footer { display: flex; align-items: center; gap: 12px; height: 28px; padding: 0
   <symbol id="i-fit" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
   <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
   <symbol id="i-print" viewBox="0 0 24 24"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M7 14h10v7H7z"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></symbol>
   <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
 </svg>
 
@@ -328,6 +330,7 @@ footer { display: flex; align-items: center; gap: 12px; height: 28px; padding: 0
       <button id="applyBtn" class="btn primary" type="button"><svg class="i"><use href="#i-apply"/></svg>Apply Adjustment</button>
       <button id="reportBtn" class="btn" type="button"><svg class="i"><use href="#i-report"/></svg>Generate Report</button>
       <button id="csv2Btn" class="btn" type="button"><svg class="i"><use href="#i-csv"/></svg>Coordinates CSV</button>
+      <button id="kml2Btn" class="btn" type="button" title="The stations, side shots and traverse line for Google Earth"><svg class="i"><use href="#i-globe"/></svg>Google Earth (KML)</button>
       <span class="grow"></span>
       <button id="backBtn" class="btn ghost" type="button"><svg class="i"><use href="#i-back"/></svg>Back to list</button>
     </div>
@@ -360,6 +363,18 @@ footer { display: flex; align-items: center; gap: 12px; height: 28px; padding: 0
       <button id="setX" class="ibtn" type="button" aria-label="Close"><svg class="i"><use href="#i-close"/></svg></button></div>
     <div class="modal-b">
       <div class="sec">
+        <h3>Coordinate system</h3>
+        <div class="grid">
+          <label class="fld w2"><span>Grid</span>
+            <select class="in" data-s="grid"><option value="qng">Qatar National Grid (QND95)</option><option value="local">Local grid (plane coordinates)</option></select></label>
+          <label class="fld g-qng"><span>Scale factor</span>
+            <select class="in" data-s="sfMode"><option value="auto">From the grid</option><option value="typed">Typed</option></select></label>
+          <label class="fld g-typed"><span>Combined scale factor</span><input class="in" data-s="scale" data-n></label>
+          <label class="fld g-auto"><span>Mean height above ellipsoid, m</span><input class="in" data-s="meanH" data-n placeholder="from the levels, else 0"></label>
+        </div>
+        <p class="note" id="gridNote"></p>
+      </div>
+      <div class="sec">
         <h3>Angles</h3>
         <div class="grid">
           <label class="fld w2"><span>The Angle column holds</span>
@@ -368,7 +383,6 @@ footer { display: flex; align-items: center; gap: 12px; height: 28px; padding: 0
             <select class="in" data-s="fmt"><option value="deg">Decimal degrees</option><option value="dms">DDD.MMSS</option><option value="gon">Gons</option></select></label>
           <label class="fld am"><span>Turned</span>
             <select class="in" data-s="angleDir"><option value="cw">Clockwise</option><option value="ccw">Anticlockwise</option></select></label>
-          <label class="fld"><span>Scale factor</span><input class="in" data-s="scale" data-n></label>
         </div>
         <p class="note" id="angNote"></p>
       </div>
@@ -433,6 +447,7 @@ footer { display: flex; align-items: center; gap: 12px; height: 28px; padding: 0
       <button id="printBtn" class="btn gold" type="button" title="Print, or choose Microsoft Print to PDF"><svg class="i"><use href="#i-print"/></svg>Print or PDF</button>
       <button id="saveRepBtn" class="btn" type="button"><svg class="i"><use href="#i-save"/></svg>Save report</button>
       <button id="csvBtn" class="btn" type="button"><svg class="i"><use href="#i-csv"/></svg>Coordinates CSV</button>
+      <button id="kmlBtn" class="btn" type="button"><svg class="i"><use href="#i-globe"/></svg>KML</button>
       <button id="closeRepBtn" class="ibtn" type="button" aria-label="Close"><svg class="i"><use href="#i-close"/></svg></button>
     </div>
     <iframe id="reportFrame" title="Report preview"></iframe>
@@ -960,6 +975,7 @@ var SURV = (function () {
       bsMode: "bearing", backsight: "BS1", bsE: "", bsN: "", bsBrg: "",
       closePoint: "A", closeE: "", closeN: "", closeH: "",
       closeMode: "point", fsName: "", fsE: "", fsN: "", fsBrg: "", closeAngle: "",
+      grid: "qng", sfMode: "auto", meanH: "",
       rows: [], adjusted: null
     };
   }
@@ -967,6 +983,7 @@ var SURV = (function () {
   /* the first traverse: a rectangle by bearings, 25 mm out */
   function firstJob() {
     var s = defaults();
+    s.grid = "local";
     s.rows = [p("0", "150", "B", "First leg"), p("90", "80", "C"), p("180", "150.02", "D"), p("270", "80.015", "A", "Close")];
     return s;
   }
@@ -975,7 +992,7 @@ var SURV = (function () {
     var s = defaults();
     var t = function (a, d, h, name, desc) { return { side: POINT, angle: a, distance: d, dh: h, name: name, desc: desc || "" }; };
     var ss = function (a, d, h, name, desc) { return { side: SIDE, angle: a, distance: d, dh: h, name: name, desc: desc || "" }; };
-    s.job = "Site control loop"; s.angleMode = "angle"; s.fmt = "dms"; s.scale = "1.00000000";
+    s.job = "Site control loop"; s.angleMode = "angle"; s.fmt = "dms"; s.scale = "1.00000000"; s.grid = "qng"; s.sfMode = "auto";
     s.cls = "primary"; s.tol = { angK: 5, ratio: 20000, hC: 8 }; s.useH = true;
     s.station = "CP-01"; s.closePoint = "CP-01"; s.startE = "228450.312"; s.startN = "441203.845"; s.startH = "4.215";
     s.bsMode = "point"; s.backsight = "CP-02"; s.bsE = "228912.640"; s.bsN = "441655.118";
@@ -995,7 +1012,7 @@ var SURV = (function () {
   function load() {
     try {
       var s = JSON.parse(localStorage.getItem(KEY) || "null");
-      if (s && s.v === 2 && Array.isArray(s.rows)) return Object.assign(defaults(), s);
+      if (s && s.v === 2 && Array.isArray(s.rows)) return Object.assign(defaults(), { grid: "local" }, s);
     } catch (e) { }
     return null;
   }
@@ -1014,6 +1031,84 @@ var SURV = (function () {
     S.type = !c ? "open" : c === st ? "loop" : "link";
   }
   syncType();
+
+
+  /* QNG START ---------- Qatar National Grid (QND95) ----------
+     The same projection and shift to WGS84 as Excel to KML's built-in Qatar National Grid
+     (kml-convertor-src, app/index.html: ELL.intl24, invTM, shift3, config() "qnd"), which is
+     checked there against 56 approved marks, worst 0.09 m. Keep the two in step. */
+  var QNG = (function () {
+    var D2R = Math.PI / 180, R2D = 180 / Math.PI;
+    var P = { a: 6378388.0, invf: 297.0, k0: 0.99999, lat0: 24.45, lon0: 51.2166666666667, FE: 200000, FN: 300000 };
+    var SHIFT = { dx: -128.033, dy: -283.697, dz: 21.052 }, BASE = { lat: 0.44, lon: -0.20 };
+    var f = 1 / P.invf, e2 = 2 * f - f * f, ep2 = e2 / (1 - e2);
+    function meridArc(phi, a, e2) {
+      return a * ((1 - e2 / 4 - 3 * e2 * e2 / 64 - 5 * e2 * e2 * e2 / 256) * phi
+        - (3 * e2 / 8 + 3 * e2 * e2 / 32 + 45 * e2 * e2 * e2 / 1024) * Math.sin(2 * phi)
+        + (15 * e2 * e2 / 256 + 45 * e2 * e2 * e2 / 1024) * Math.sin(4 * phi)
+        - (35 * e2 * e2 * e2 / 3072) * Math.sin(6 * phi));
+    }
+    /* inverse transverse Mercator -> geographic on the SAME ellipsoid, radians */
+    function invTM(E, N, p) {
+      var a = p.a, f = 1 / p.invf, e2 = 2 * f - f * f, ep2 = e2 / (1 - e2);
+      var lat0 = p.lat0 * D2R, lon0 = p.lon0 * D2R;
+      var Mv = meridArc(lat0, a, e2) + (N - p.FN) / p.k0;
+      var mu = Mv / (a * (1 - e2 / 4 - 3 * e2 * e2 / 64 - 5 * e2 * e2 * e2 / 256));
+      var e1 = (1 - Math.sqrt(1 - e2)) / (1 + Math.sqrt(1 - e2));
+      var fp = mu + (3 * e1 / 2 - 27 * Math.pow(e1, 3) / 32) * Math.sin(2 * mu)
+        + (21 * e1 * e1 / 16 - 55 * Math.pow(e1, 4) / 32) * Math.sin(4 * mu)
+        + (151 * Math.pow(e1, 3) / 96) * Math.sin(6 * mu)
+        + (1097 * Math.pow(e1, 4) / 512) * Math.sin(8 * mu);
+      var C = ep2 * Math.cos(fp) * Math.cos(fp), T = Math.tan(fp) * Math.tan(fp);
+      var s = Math.sin(fp), n1 = a / Math.sqrt(1 - e2 * s * s), r1 = a * (1 - e2) / Math.pow(1 - e2 * s * s, 1.5);
+      var D = (E - p.FE) / (n1 * p.k0), D2 = D * D, D3 = D2 * D, D4 = D3 * D, D5 = D4 * D, D6 = D5 * D;
+      var lat = fp - (n1 * Math.tan(fp) / r1) * (D2 / 2 - (5 + 3 * T + 10 * C - 4 * C * C - 9 * ep2) * D4 / 24
+        + (61 + 90 * T + 298 * C + 45 * T * T - 252 * ep2 - 3 * C * C) * D6 / 720);
+      var lon = lon0 + (D - (1 + 2 * T + C) * D3 / 6
+        + (5 - 2 * C + 28 * T - 3 * C * C + 8 * ep2 + 24 * T * T) * D5 / 120) / Math.cos(fp);
+      return [lat, lon];
+    }
+    /* three-parameter geocentric shift, source ellipsoid -> WGS84, radians in/out */
+    function shift3(lat, lon, h, a, invf, dx, dy, dz) {
+      var f = 1 / invf, e2 = 2 * f - f * f;
+      var sl = Math.sin(lat), cl = Math.cos(lat);
+      var v = a / Math.sqrt(1 - e2 * sl * sl);
+      var x = (v + h) * cl * Math.cos(lon) + dx, y = (v + h) * cl * Math.sin(lon) + dy, z = (v * (1 - e2) + h) * sl + dz;
+      var aw = 6378137.0, fw = 1 / 298.257223563, e2w = 2 * fw - fw * fw;
+      var pr = Math.sqrt(x * x + y * y), la = Math.atan2(z, pr * (1 - e2w)), la2;
+      for (var i = 0; i < 10; i++) {
+        var s2 = Math.sin(la), vw = aw / Math.sqrt(1 - e2w * s2 * s2);
+        la2 = Math.atan2(z + e2w * vw * s2, pr);
+        if (Math.abs(la2 - la) < 1e-13) { la = la2; break; }
+        la = la2;
+      }
+      return [la, Math.atan2(y, x)];
+    }
+    /* grid -> WGS84 degrees, as Excel to KML's gridToLatLon does for the Qatar National Grid */
+    function toWGS84(E, N, h) {
+      var g = invTM(E, N, P), s = shift3(g[0], g[1], h || 0, P.a, P.invf, SHIFT.dx, SHIFT.dy, SHIFT.dz);
+      var latD = s[0] * R2D, lonD = s[1] * R2D;
+      latD += BASE.lat / 111320;
+      lonD += BASE.lon / (111320 * Math.cos(s[0]));
+      return [latD, lonD];
+    }
+    /* the point scale factor of the projection (Snyder 8-11), from the latitude and longitude on the grid's own ellipsoid */
+    function pointScale(E, N) {
+      var g = invTM(E, N, P), phi = g[0], A = (g[1] - P.lon0 * D2R) * Math.cos(phi);
+      var T = Math.tan(phi) * Math.tan(phi), C = ep2 * Math.cos(phi) * Math.cos(phi), A2 = A * A;
+      return P.k0 * (1 + (1 + C) * A2 / 2 + (5 - 4 * T + 42 * C + 13 * C * C - 28 * ep2) * A2 * A2 / 24 + (61 - 148 * T + 16 * T * T) * A2 * A2 * A2 / 720);
+    }
+    /* distances at height h above the ellipsoid shrink by R / (R + h) on the ellipsoid */
+    function heightFactor(N, h) {
+      var phi = invTM(P.FE, N, P)[0], s = Math.sin(phi);
+      var nu = P.a / Math.sqrt(1 - e2 * s * s), rho = P.a * (1 - e2) / Math.pow(1 - e2 * s * s, 1.5), R = Math.sqrt(rho * nu);
+      return R / (R + (h || 0));
+    }
+    /* Qatar and its waters, generously, as latitude and longitude */
+    function inQatar(E, N) { var w = toWGS84(E, N, 0); return w[0] > 24.3 && w[0] < 26.4 && w[1] > 50.5 && w[1] < 52.2; }
+    return { P: P, toWGS84: toWGS84, pointScale: pointScale, heightFactor: heightFactor, inQatar: inQatar };
+  })();
+  /* QNG END */
 
   /* ---------- the model: who stands where ---------- */
   var bearings = function () { return S.angleMode === "bearing"; };
@@ -1059,7 +1154,26 @@ var SURV = (function () {
     var e = endPt(), q = fsPt();
     return e && q && (e.E !== q.E || e.N !== q.N) ? SURV.azimuth(e.E, e.N, q.E, q.N) : null;
   }
-  var scale = function () { var s = tn(S.scale); return ok(s) && s > 0 ? s : 1; };
+  /* the scale factor: worked out from the Qatar National Grid, or as typed */
+  function scale() {
+    if (S.grid === "qng" && S.sfMode === "auto") { var g = gridFactors(); if (g && !g.outside) return g.csf; }
+    var s = tn(S.scale); return ok(s) && s > 0 ? s : 1;
+  }
+  function typedScale() { return S.grid === "qng" && S.sfMode === "auto" ? scale() : tn(S.scale); }
+  /* the point scale factor where the traverse is, times the height factor for its mean height */
+  function gridFactors() {
+    if (S.grid !== "qng") return null;
+    var st0 = provisional(1).st, st = st0.concat(sideShots(layout(), st0, 1).filter(function (q) { return ok(q.E); }));
+    if (!st.length) return null;
+    var E = 0, N = 0, hs = [];
+    st.forEach(function (q) { E += q.E; N += q.N; if (ok(q.H)) hs.push(q.H); });
+    E /= st.length; N /= st.length;
+    /* off the grid's area the projection means nothing: no factor until the coordinates are put right */
+    if (!QNG.inQatar(E, N)) return { E: E, N: N, outside: true };
+    var typedH = tn(S.meanH), h = ok(typedH) ? typedH : hs.length ? hs.reduce(function (a, b) { return a + b; }, 0) / hs.length : 0;
+    var k = QNG.pointScale(E, N), ef = QNG.heightFactor(N, h);
+    return { E: E, N: N, k: k, h: h, hFrom: ok(typedH) ? "typed" : hs.length ? "levels" : "none", ef: ef, csf: k * ef };
+  }
   function readAngle(raw) { var a = SURV.parseAngle(raw, S.fmt); return ok(a) ? a : null; }
   /* the bearing of a line out of a set-up whose backsight bearing is bsAz */
   function lineAz(raw, bsAz) {
@@ -1128,7 +1242,7 @@ var SURV = (function () {
       return { name: nm, angle: endOri.mode !== "none" ? SURV.parseAngle(S.closeAngle, S.fmt) : null, dist: null, dh: null };
     });
     return {
-      type: S.type, method: S.method, angleDir: bearings() ? "cw" : S.angleDir, scale: tn(S.scale),
+      type: S.type, method: S.method, angleDir: bearings() ? "cw" : S.angleDir, scale: typedScale(),
       tol: { angK: +S.tol.angK || 0, ratio: +S.tol.ratio || 0, hC: +S.tol.hC || 0 },
       sigma: { ang: +S.sigma.ang || 1, dA: +S.sigma.dA || 1, dB: +S.sigma.dB || 0 }, useH: !!S.useH,
       startPt: sp, endPt: ep, startOri: { mode: "bearing", az: saz }, endOri: endOri, rows: rows
@@ -1150,8 +1264,8 @@ var SURV = (function () {
   }
 
   /* the stations as observed, before any adjustment, as far as the rows go */
-  function provisional() {
-    var L = layout(), sp = startPt(), saz = startAz(), sc = scale(), st = [];
+  function provisional(fixedScale) {
+    var L = layout(), sp = startPt(), saz = startAz(), sc = fixedScale || scale(), st = [];
     if (sp) {
       st.push({ name: L.names[0], E: sp.E, N: sp.N, H: sp.H, bsAz: saz });
       /* without a backsight direction, angles cannot be turned: only the start is known */
@@ -1173,15 +1287,15 @@ var SURV = (function () {
     });
   }
   /* side shots radiate from their set-up; they are never adjusted themselves */
-  function sideShots(L, st) {
-    var out = [];
+  function sideShots(L, st, fixedScale) {
+    var out = [], sc = fixedScale || scale();
     S.rows.forEach(function (r, i) {
       var inf = L.info[i];
       if (inf.kind !== "s") return;
       var q = st[inf.k], d = tn(r.distance), dh = tn(r.dh), o = { i: i, name: inf.to, from: inf.station, desc: r.desc || "", E: null, N: null, H: null };
       var az = q ? lineAz(r.angle, q.bsAz) : null;
       if (q && az !== null && ok(d) && d > 0) {
-        o.E = q.E + d * scale() * Math.sin(az * Math.PI / 180); o.N = q.N + d * scale() * Math.cos(az * Math.PI / 180);
+        o.E = q.E + d * sc * Math.sin(az * Math.PI / 180); o.N = q.N + d * sc * Math.cos(az * Math.PI / 180);
         o.H = S.useH && ok(q.H) && ok(dh) ? q.H + dh : null; o.az = az; o.d = d;
       }
       out.push(o);
@@ -1221,6 +1335,27 @@ var SURV = (function () {
     if (structural) renderAll(); else refresh();
   }
 
+  /* ---------- the grid, in words ---------- */
+  var sf = function (v) { return ok(v) ? v.toFixed(8) : "—"; };
+  function gridText(long) {
+    if (S.grid !== "qng") return "Local grid: coordinates are plane; distances are multiplied by the scale factor typed here" + (long ? " (1 for ground distances)." : ".");
+    if (S.sfMode !== "auto") return "Qatar National Grid, with the scale factor typed here. Latitude and longitude come from the grid.";
+    var g = gridFactors();
+    if (!g) return "Qatar National Grid. The scale factor is worked out once the start station has coordinates.";
+    if (g.outside) return "Qatar National Grid, but the traverse is not in Qatar, so no scale factor is worked out: 1 is used until the coordinates are put right.";
+    return "Qatar National Grid. Point scale factor " + sf(g.k) + " at the middle of the traverse (E " + fc(g.E, 0) + ", N " + fc(g.N, 0) + ")" +
+      " × height factor " + sf(g.ef) + " for " + f(g.h, 1) + " m" + (g.hFrom === "levels" ? " (the mean level)" : g.hFrom === "none" ? "" : "") +
+      " = combined scale factor " + sf(g.csf) + ". Every distance is multiplied by it to give the grid distance.";
+  }
+  /* coordinates that cannot be in Qatar are almost always swapped or mistyped */
+  function gridWarning() {
+    if (S.grid !== "qng") return "";
+    var sp = startPt();
+    if (!sp || QNG.inQatar(sp.E, sp.N)) return "";
+    return "The start station (E " + fc(sp.E, 3) + ", N " + fc(sp.N, 3) + ") is not in Qatar on the Qatar National Grid. Check that the Easting and Northing are not swapped, or set the grid to Local in Settings.";
+  }
+  function latLon(q) { return S.grid === "qng" && q && ok(q.E) && ok(q.N) ? QNG.toWGS84(q.E, q.N, ok(q.H) ? q.H : 0) : null; }
+
   /* ---------- the setup row and the settings ---------- */
   function renderSetup() {
     document.querySelectorAll("[data-s]").forEach(function (el) {
@@ -1240,6 +1375,10 @@ var SURV = (function () {
     show(".fs-brg", am && closed() && S.closeMode === "bearing");
     show(".fs-ang", am && closed() && S.closeMode !== "none");
     show(".lv", !!S.useH);
+    show(".g-qng", S.grid === "qng");
+    show(".g-auto", S.grid === "qng" && S.sfMode === "auto");
+    show(".g-typed", S.grid !== "qng" || S.sfMode !== "auto");
+    $("gridNote").textContent = gridText(true);
     if (S.type !== "link") document.querySelectorAll(".cl-link.lv").forEach(function (el) { el.style.display = "none"; });
     $("closePointOpt").textContent = S.type === "loop" ? "Back onto the backsight" : "Foresight point";
     $("kindTag").textContent = TYPE[S.type];
@@ -1333,15 +1472,19 @@ var SURV = (function () {
     });
     var nT = L.tr.length, nS = S.rows.length - nT, R = run(), st = status(R);
     $("chips").innerHTML = ['<span class="chip">' + nT + " leg" + (nT === 1 ? "" : "s") + "</span>", nS ? '<span class="chip">' + nS + " side shot" + (nS === 1 ? "" : "s") + "</span>" : "",
-      '<span class="chip">' + (bearings() ? "Bearings" : "Angles") + ", " + { deg: "decimal degrees", dms: "DDD.MMSS", gon: "gons" }[S.fmt] + "</span>"].join("");
+      '<span class="chip">' + (bearings() ? "Bearings" : "Angles") + ", " + { deg: "decimal degrees", dms: "DDD.MMSS", gon: "gons" }[S.fmt] + "</span>",
+      '<span class="chip" title="' + esc(gridText(false)) + '">' + (S.grid === "qng" ? "Qatar National Grid" : "Local grid") + " · SF " + scale().toFixed(7) + "</span>"].join("");
     var pill = $("statusPill");
     pill.className = "pill " + st;
     pill.innerHTML = '<span class="dot"></span>' + esc({ pass: "Within tolerance", fail: "Outside tolerance", open: "Open: no check", err: "Not complete" }[st]);
     pill.title = st === "err" ? R.error : "Open Close and adjust";
     $("listSub").textContent = sh.adj ? "Showing the adjusted coordinates (" + METHOD[S.adjusted.method] + "). Edit anything to go back to the observed ones." : "Easting and Northing are worked out from the angles and distances.";
-    $("tfoot").innerHTML = st === "err" && S.rows.length ? '<svg class="i" style="color:var(--warn)"><use href="#i-alert"/></svg><span>' + esc(R.error) + "</span>" :
+    var gw = gridWarning();
+    $("tfoot").classList.toggle("warn", !!gw);
+    $("tfoot").innerHTML = gw ? '<svg class="i"><use href="#i-alert"/></svg><span>' + esc(gw) + "</span>" : st === "err" && S.rows.length ? '<svg class="i" style="color:var(--warn)"><use href="#i-alert"/></svg><span>' + esc(R.error) + "</span>" :
       "<span>" + (bearings() ? "Bearing" : "Angle") + " and Distance give each new point. Type an Easting and Northing instead to work them out. A Side shot is taken from the set-up of the row above it.</span>";
     foot();
+    if (!$("setOverlay").hidden) $("gridNote").textContent = gridText(true);
     draw($("plan"), false);
     if (!$("step2").hidden) renderClose();
   }
@@ -1572,7 +1715,8 @@ var SURV = (function () {
   function showTip(m, x, y) {
     var t = $("tip");
     if (!m) { t.hidden = true; return; }
-    t.innerHTML = "<b>" + esc(m.p.name || "?") + "</b> · " + esc(m.kind) + "<br>E " + f(m.p.E, 3) + "  N " + f(m.p.N, 3) + (ok(m.p.H) ? "<br>Level " + f(m.p.H, 3) : "");
+    t.innerHTML = "<b>" + esc(m.p.name || "?") + "</b> · " + esc(m.kind) + "<br>E " + f(m.p.E, 3) + "  N " + f(m.p.N, 3) + (ok(m.p.H) ? "<br>Level " + f(m.p.H, 3) : "") +
+      (function () { var w = latLon(m.p); return w ? "<br>" + w[0].toFixed(7) + "°, " + w[1].toFixed(7) + "°" : ""; })();
     t.hidden = false;
     var bw = $("plan").clientWidth;
     t.style.left = Math.min(x + 14, bw - t.offsetWidth - 6) + "px"; t.style.top = (y + 14) + "px";
@@ -1605,7 +1749,8 @@ var SURV = (function () {
     if (c.precPass === false) why.push("precision " + ratioTx(c.precision) + " is under 1:" + fc(c.ratioReq, 0));
     if (c.hPass === false) why.push("level misclosure " + mm(c.fH) + " is over ±" + mm(c.hAllow));
     if (q && q.chi && !q.chi.pass) why.push("the least squares test fails: the observations disagree " + (q.chi.value > q.chi.hi ? "more" : "less") + " than their σ in Settings allow");
-    $("banner").innerHTML = '<div class="banner ' + stt + '"><svg class="i"><use href="#i-' + (stt === "pass" ? "check" : stt === "fail" ? "x" : "alert") + '"/></svg><div>' +
+    var gw = gridWarning();
+    $("banner").innerHTML = (gw ? '<div class="errbox" style="margin-bottom:10px"><svg class="i"><use href="#i-alert"/></svg><div>' + esc(gw) + "</div></div>" : "") + '<div class="banner ' + stt + '"><svg class="i"><use href="#i-' + (stt === "pass" ? "check" : stt === "fail" ? "x" : "alert") + '"/></svg><div>' +
       { pass: "Within tolerance", fail: "Outside tolerance", open: "Open traverse: nothing to check it against" }[stt] +
       (why.length ? ' <span class="why">· ' + esc(why.join("; ")) + "</span>" : stt === "pass" ? ' <span class="why">· ' + esc(S.cls === "custom" ? "custom tolerance" : S.cls + " class") + "</span>" : "") + "</div></div>";
 
@@ -1700,18 +1845,54 @@ var SURV = (function () {
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
   }
   var csvCell = function (v) { v = v === null || v === undefined ? "" : String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
-  function coordsCsv() {
+  /* every point once, adjusted when the traverse closes, as observed when it does not yet */
+  function pointList() {
     var R = run(), st = R.ok ? adjustedStations(R) : provisional().st;
-    var L = layout(), lines = [["Name", "Easting", "Northing", "Level", "Kind", "Description"].join(",")];
-    var descOf = {};
-    S.rows.forEach(function (r, i) { if (L.info[i].kind === "t") descOf[L.info[i].to] = r.desc; });
+    var L = layout(), descOf = {}, out = [];
+    S.rows.forEach(function (r, i) { if (L.info[i].kind === "t" && !L.info[i].closing) descOf[L.info[i].to] = r.desc; });
     st.forEach(function (q, i) {
       if (i > 0 && S.type === "loop" && i === st.length - 1 && L.names.length === st.length) return;
-      lines.push([q.name, f(q.E, 3), f(q.N, 3), ok(q.H) ? f(q.H, 3) : "", i === 0 ? "Start" : "Station", descOf[q.name] || ""].map(csvCell).join(","));
+      out.push({ name: q.name, E: q.E, N: q.N, H: q.H, kind: i === 0 ? "Start" : "Station", desc: descOf[q.name] || "" });
     });
-    sideShots(L, st).forEach(function (s) { if (ok(s.E)) lines.push([s.name, f(s.E, 3), f(s.N, 3), ok(s.H) ? f(s.H, 3) : "", "Side shot", s.desc].map(csvCell).join(",")); });
-    saveFile("﻿" + lines.join("\r\n") + "\r\n", fileBase() + " adjusted.csv", "text/csv;charset=utf-8");
-    if (!R.ok) toast("Not adjusted yet (" + R.error + "). The coordinates are as observed.");
+    sideShots(L, st).forEach(function (q) { if (ok(q.E)) out.push({ name: q.name, E: q.E, N: q.N, H: q.H, kind: "Side shot", desc: q.desc }); });
+    return { R: R, st: st, pts: out };
+  }
+  function coordsCsv() {
+    var P = pointList(), qng = S.grid === "qng";
+    var lines = [["Name", "Easting", "Northing", "Level"].concat(qng ? ["Latitude (WGS84)", "Longitude (WGS84)"] : [], ["Kind", "Description"]).join(",")];
+    P.pts.forEach(function (q) {
+      var w = latLon(q);
+      lines.push([q.name, f(q.E, 3), f(q.N, 3), ok(q.H) ? f(q.H, 3) : ""].concat(qng ? [w[0].toFixed(8), w[1].toFixed(8)] : [], [q.kind, q.desc]).map(csvCell).join(","));
+    });
+    saveFile("\uFEFF" + lines.join("\r\n") + "\r\n", fileBase() + (P.R.ok ? " adjusted" : " observed") + ".csv", "text/csv;charset=utf-8");
+    if (!P.R.ok) toast("Not adjusted yet (" + P.R.error + "). The coordinates are as observed.");
+  }
+  /* Google Earth: stations, side shots and the traverse line, through the Qatar National Grid */
+  function kmlExport() {
+    if (S.grid !== "qng") { toast("Google Earth needs the Qatar National Grid: set the grid in Settings. A local grid has no position on the earth."); return; }
+    var P = pointList(), x = function (v) { return esc(v); };
+    var ll = function (q) { var w = latLon(q); return w[1].toFixed(9) + "," + w[0].toFixed(9) + ",0"; };
+    var desc = function (q) {
+      var w = latLon(q);
+      return "<![CDATA[<b>" + x(q.name) + "</b> · " + x(q.kind) + "<br>E " + f(q.E, 3) + "<br>N " + f(q.N, 3) + (ok(q.H) ? "<br>Level " + f(q.H, 3) : "") +
+        "<br>" + w[0].toFixed(8) + ", " + w[1].toFixed(8) + (q.desc ? "<br>" + x(q.desc) : "") + "<br><i>Qatar National Grid (QND95)</i>]]>";
+    };
+    var line = P.st.map(ll);
+    var kml = '<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>' + x(S.job || "Traverse") + "</name>" +
+      "<description>" + x(TYPE[S.type] + " · " + (P.R.ok ? METHOD[S.method] + " adjustment" : "not adjusted") + " · " + appVer()) + "</description>" +
+      '<Style id="st"><IconStyle><color>ff5aa1c6</color><scale>0.9</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/triangle.png</href></Icon></IconStyle><LabelStyle><scale>0.8</scale></LabelStyle></Style>' +
+      '<Style id="ss"><IconStyle><color>ff2a7db0</color><scale>0.6</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon></IconStyle><LabelStyle><scale>0.7</scale></LabelStyle></Style>' +
+      '<Style id="ln"><LineStyle><color>ff00d7ff</color><width>3</width></LineStyle></Style>' +
+      "<Folder><name>Traverse line</name><Placemark><name>" + x(S.job || "Traverse") + '</name><styleUrl>#ln</styleUrl><LineString><tessellate>1</tessellate><coordinates>' + line.join(" ") + "</coordinates></LineString></Placemark></Folder>" +
+      "<Folder><name>Stations</name>" + P.pts.filter(function (q) { return q.kind !== "Side shot"; }).map(function (q) {
+        return "<Placemark><name>" + x(q.name) + "</name><description>" + desc(q) + '</description><styleUrl>#st</styleUrl><Point><coordinates>' + ll(q) + "</coordinates></Point></Placemark>";
+      }).join("") + "</Folder>" +
+      (P.pts.some(function (q) { return q.kind === "Side shot"; }) ? "<Folder><name>Side shots</name>" + P.pts.filter(function (q) { return q.kind === "Side shot"; }).map(function (q) {
+        return "<Placemark><name>" + x(q.name) + "</name><description>" + desc(q) + '</description><styleUrl>#ss</styleUrl><Point><coordinates>' + ll(q) + "</coordinates></Point></Placemark>";
+      }).join("") + "</Folder>" : "") +
+      "</Document></kml>\n";
+    saveFile(kml, fileBase() + ".kml", "application/vnd.google-earth.kml+xml");
+    if (!P.R.ok) toast("Not adjusted yet (" + P.R.error + "). The KML shows the points as observed.");
   }
   function saveJob() { saveFile(JSON.stringify(Object.assign({ app: "Traverse Pro" }, S), null, 2), fileBase() + ".json", "application/json"); }
 
@@ -1783,8 +1964,8 @@ var SURV = (function () {
           var j = JSON.parse(text);
           if (!j || !Array.isArray(j.rows)) throw new Error("This is not a Traverse Pro job.");
           remember(""); SEL = -1; resetView();
-          if (j.v === 2) { S = Object.assign(defaults(), j); delete S.app; }
-          else if (j.v === 1) { S = Object.assign(defaults(), j, { v: 2, angleMode: "angle", closePoint: j.type === "loop" ? j.station : j.type === "open" ? "" : j.closePoint }); delete S.app; }
+          if (j.v === 2) { S = Object.assign(defaults(), { grid: "local" }, j); delete S.app; }
+          else if (j.v === 1) { S = Object.assign(defaults(), { grid: "local" }, j, { v: 2, angleMode: "angle", closePoint: j.type === "loop" ? j.station : j.type === "open" ? "" : j.closePoint }); delete S.app; }
           else {
             /* the first Traverse Pro saved its state as it stood: angles were bearings */
             S = defaults();
@@ -1813,13 +1994,14 @@ var SURV = (function () {
       ["Backsight", bsLabel() + (!bearings() ? (S.bsMode === "point" ? "  E " + S.bsE + "  N " + S.bsN : "  bearing " + S.bsBrg) : "")],
       ["Close point", closed() ? closeName() + (S.type === "link" ? "  E " + S.closeE + "  N " + S.closeN : "") : "none: open traverse"],
       ["Angle column", bearings() ? "Bearings" : "Angles turned " + (S.angleDir === "cw" ? "clockwise" : "anticlockwise") + " from the backsight" + (closed() && S.closeMode !== "none" ? ", closing angle " + S.closeAngle : "")],
-      ["Typed as", { dms: "DDD.MMSS", deg: "Decimal degrees", gon: "Gons" }[S.fmt]], ["Scale factor", S.scale],
+      ["Typed as", { dms: "DDD.MMSS", deg: "Decimal degrees", gon: "Gons" }[S.fmt]],
+      ["Coordinate system", gridText(false)], ["Scale factor used", sf(scale())],
       ["Tolerance", (S.cls === "custom" ? "Custom" : S.cls.charAt(0).toUpperCase() + S.cls.slice(1)) + ": " + (bearings() ? "" : S.tol.angK + '" × √n, ') + "1:" + S.tol.ratio + (S.useH ? ", levels " + S.tol.hC + " mm × √km" : "")]];
     var L = layout();
     var obs = "<table><thead><tr><th>#</th><th>Side</th><th>Station</th><th>Backsight</th><th>" + (bearings() ? "Bearing" : "Angle") + "</th><th>Distance</th>" + (S.useH ? "<th>Ht diff</th>" : "") + "<th>Name</th><th>Description</th></tr></thead><tbody>" +
       S.rows.map(function (r, i) { var inf = L.info[i]; return "<tr><td>" + (i + 1) + "</td><td>" + esc(r.side) + "</td><td>" + esc(inf.station) + "</td><td>" + esc(inf.bs) + "</td><td>" + esc(r.angle) + "</td><td>" + esc(r.distance) + "</td>" + (S.useH ? "<td>" + esc(r.dh) + "</td>" : "") + "<td>" + esc(inf.to) + "</td><td>" + esc(r.desc) + "</td></tr>"; }).join("") + "</tbody></table>";
-    var body = R.ok ? '<div class="res">' + $("banner").textContent + "</div><h2>Closure</h2>" + '<div class="tiles">' + $("tiles").innerHTML + "</div><h2>Checks</h2>" + tbl("checks") + "<h2>Adjusted values</h2>" + tbl("adj") + $("lsqBox").innerHTML.replace(/<h3>/g, "<h2>").replace(/<\/h3>/g, "</h2>") +
-      (bearings() ? "" : "<h2>Angles</h2>" + tbl("angles")) + $("sideBox").innerHTML.replace(/<h3>/g, "<h2>").replace(/<\/h3>/g, "</h2>") + ($("warnBox").innerHTML ? "<h2>Notes</h2><ul>" + $("warnBox").innerHTML + "</ul>" : "") + "<h2>Plan</h2>" + plan
+    var body = R.ok ? '<div class="res">' + $("banner").textContent + "</div><h2>Closure</h2>" + '<div class="tiles">' + $("tiles").innerHTML + "</div><h2>Checks</h2>" + tbl("checks") + "<h2>Adjusted values</h2>" + tbl("adj") + coordTable() + $("lsqBox").innerHTML.replace(/<h3>/g, "<h2>").replace(/<\/h3>/g, "</h2>") +
+      (bearings() ? "" : "<h2>Angles</h2>" + tbl("angles")) + $("sideBox").innerHTML.replace(/<h3>/g, "<h2>").replace(/<\/h3>/g, "</h2>") + ($("warnBox").innerHTML || gridWarning() ? "<h2>Notes</h2><ul>" + (gridWarning() ? "<li>" + esc(gridWarning()) + "</li>" : "") + $("warnBox").innerHTML + "</ul>" : "") + "<h2>Plan</h2>" + plan
       : '<p class="err">Not adjusted: ' + esc(R.error) + "</p>";
     return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>' + esc(S.job) + ' - traverse report</title><style>' +
       'body{font:12px "Segoe UI",Arial,sans-serif;color:#1c2430;margin:28px}h1{font-size:19px;margin:0;color:#1b2735}h2{font-size:13px;margin:20px 0 6px;color:#1b2735;border-bottom:2px solid #c6a15a;padding-bottom:3px}' +
@@ -1834,6 +2016,16 @@ var SURV = (function () {
       '<h2>Set-up</h2><table class="kv"><tbody>' + setup.map(function (x) { return "<tr><td>" + esc(x[0]) + "</td><td>" + esc(x[1]) + "</td></tr>"; }).join("") + "</tbody></table>" +
       "<h2>Field book</h2>" + obs + body +
       '<div class="foot">' + esc(appVer()) + (S.adjusted ? " · adjustment applied " + esc(new Date(S.adjusted.at).toLocaleString()) : " · adjustment not yet applied") + "</div></body></html>";
+  }
+  /* every point with its grid and WGS84 position */
+  function coordTable() {
+    var qng = S.grid === "qng", P = pointList();
+    return "<h2>Coordinates" + (qng ? ", with WGS84 latitude and longitude" : "") + "</h2><table><thead><tr><th>Name</th><th>Kind</th><th class=r>Easting</th><th class=r>Northing</th>" + (S.useH ? "<th class=r>Level</th>" : "") +
+      (qng ? "<th class=r>Latitude</th><th class=r>Longitude</th>" : "") + "<th>Description</th></tr></thead><tbody>" + P.pts.map(function (q) {
+        var w = latLon(q);
+        return "<tr><td>" + esc(q.name) + "</td><td>" + esc(q.kind) + "</td><td class=r>" + f(q.E, 3) + "</td><td class=r>" + f(q.N, 3) + "</td>" + (S.useH ? "<td class=r>" + (ok(q.H) ? f(q.H, 3) : "—") + "</td>" : "") +
+          (qng ? "<td class=r>" + w[0].toFixed(8) + "°</td><td class=r>" + w[1].toFixed(8) + "°</td>" : "") + "<td>" + esc(q.desc) + "</td></tr>";
+      }).join("") + "</tbody></table>";
   }
   var REPORT = "";
   function openReport() {
@@ -1973,6 +2165,8 @@ var SURV = (function () {
   $("reportBtn").onclick = openReport;
   $("csvBtn").onclick = coordsCsv;
   $("csv2Btn").onclick = coordsCsv;
+  $("kmlBtn").onclick = kmlExport;
+  $("kml2Btn").onclick = kmlExport;
   $("printBtn").onclick = function () { var w = $("reportFrame").contentWindow; w.focus(); w.print(); };
   $("saveRepBtn").onclick = function () { saveFile(REPORT, fileBase() + " report.html", "text/html;charset=utf-8"); };
   $("closeRepBtn").onclick = function () { $("reportOverlay").hidden = true; };
@@ -2006,7 +2200,11 @@ var SURV = (function () {
   };
 
   /* for checks from outside the page */
-  window.TraversePro = { state: function () { return JSON.parse(JSON.stringify(S)); }, run: function () { RUN = null; return run(); }, importText: importText };
+  window.TraversePro = {
+    state: function () { return JSON.parse(JSON.stringify(S)); }, run: function () { RUN = null; return run(); }, importText: importText,
+    qng: QNG, gridFactors: function () { return gridFactors(); }, scale: function () { return scale(); }, points: function () { return pointList().pts; },
+    load: function (job) { remember(""); S = Object.assign(defaults(), job); syncType(); RUN = null; SEL = -1; resetView(); save(); renderAll(); }
+  };
 
   undoButtons();
   renderAll();

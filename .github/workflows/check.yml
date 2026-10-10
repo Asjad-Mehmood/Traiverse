@@ -24,6 +24,9 @@ jobs:
       - name: Check the traverse engine
         run: node tools/check-engine.js
 
+      - name: Check the Qatar National Grid
+        run: node tools/check-qng.js
+
       - name: Check the page's scripts parse
         run: |
           node -e '

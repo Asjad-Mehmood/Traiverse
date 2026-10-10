@@ -15,39 +15,42 @@ internet connection.
 
 ## Quick start
 
-1. **Set up.** Under *Start*, type the station you set up on and its Easting and Northing. Under
-   *Backsight*, type the point you sighted back to and its coordinates, or a bearing to it.
-2. **Choose the kind of traverse.** A *closed loop* comes back to its start station. A *closed
-   link* ends on another known point: type it under *Close*. An *open* traverse has no check.
-3. **List the field book.** Each row is one set-up: at **Station**, sighting back to
-   **Backsight**, turn the **Angle** and measure the **Distance** to the new point, **Name**.
-   The Station and Backsight of each row follow from the row above. Easting and Northing are
-   worked out as you type.
-4. **Close.** Under *Close*, type the closing angle: at the close point, from the last station
-   onto the backsight (loop) or the foresight point (link). Choose *None* if it was not observed.
-5. **Adjust.** Open **2 Close and adjust**, pick the adjustment, check the misclosures against
-   their tolerance and press **Apply Adjustment**. The list then shows the adjusted coordinates.
-   Your observations are never changed.
-6. **Report and save.** **Generate Report** for a printable report (*Print or PDF*),
-   **Coordinates CSV** for the adjusted points and **Save** (Ctrl+S) to keep the job.
+1. **Set up.** In the row under the ribbon, type the **Station** you start on, its **Backsight**,
+   the **Close point** and the **Start Easting** and **Start Northing**.
+2. **The close point decides the kind of traverse.** The start station again: a *closed loop*.
+   Another known point: a *closed link* (give its coordinates in **Settings**). Empty: an *open*
+   traverse, with no check.
+3. **List the points.** Each row is one set-up: at **Station**, sighting back to **Backsight**,
+   the **Angle** and **Distance** to the new point, **Name**. Station and Backsight follow from the
+   row above. Easting and Northing are worked out as you type; type an Easting and Northing
+   instead and the angle and distance are worked back from them.
+4. **Close.** Open **2 Close and adjust**, pick **Compass**, **Transit** or **Least squares** and
+   press **Apply Adjustment**. The list then shows the adjusted coordinates. Your observations are
+   never changed. **Generate Report** gives a printable report, a PDF and the adjusted
+   coordinates as CSV.
+5. **Save** (Ctrl+S) keeps the job as a file.
 
-New to the program? Press **Try the sample** for a levelled primary loop on two pillars.
+**Add point by click** adds a row. Clicking on the plan adds a point where you click, with its
+angle and distance worked back from the plan. In a closed traverse the new point goes in before
+the closing leg, and the closing leg is measured on the plan too.
 
-## The list
+## Settings
 
-| Column | |
+| | |
 |---|---|
-| Side | *Traverse* for a leg of the traverse. *Side shot* for a point taken from the same set-up as the traverse row above it; side shots are not part of the adjustment and are worked out from the adjusted stations. |
-| Station, Backsight | Where the instrument stood and what it sighted back to. Filled in for you. |
-| Angle | The horizontal angle turned from the backsight. Type it as `DDD.MMSS` (`81.3127`), `81°31'27"`, `81 31 27`, decimal degrees or gons, as chosen under *Angles typed as*. Clockwise or anticlockwise under *Angles turned*. |
-| Distance | Horizontal distance to the new point, in metres. Multiplied by the *Scale factor* for grid distances. |
-| Ht diff | Height difference to the new point. Shown when *Carry levels* is ticked. |
-| Easting, Northing, Level | Worked out. Green once an adjustment is applied. |
-| Name, Description | The new point. In a closed traverse the last leg always ends on the close point. |
+| The Angle column holds | **Bearings** (whole-circle bearing of each line, the default) or **Angles turned from the backsight**, clockwise or anticlockwise, as a field book has them. With bearings there is no angular check: the misclosure is the linear one only. |
+| Typed as | Decimal degrees, `DDD.MMSS` (`81.3127` is 81°31'27"), or gons. `81°31'27"` and `81 31 27` are read too. |
+| Scale factor | Ground distances times this give grid distances. |
+| Backsight | For angles: the backsight point's coordinates, or a bearing to it. |
+| Close | For a closed link: the close point's coordinates. For angles: the closing orientation and the closing angle at the close point. |
+| Tolerance | Primary, Secondary, Tertiary or your own: angular *K*″ × √n, linear precision 1 : *x*, levels *C* mm × √km. |
+| Carry levels | Adds Ht diff and Level columns; the level misclosure is checked and spread. |
+| Least squares | Standard errors of the angles and distances. |
 
-**Add point by click.** Press it, then click on the plan: each click adds a station there, with
-its angle and distance worked back from the plan. In a closed traverse the new station goes in
-before the closing leg, and the closing leg is measured on the plan too. Esc stops.
+**Load the sample loop** loads a primary loop on two pillars, observed with angles, levelled,
+with two side shots. A row's **Side** can be *Point* (a traverse station) or *Side shot*: a point
+taken from the same set-up as the row above it, worked out from the adjusted stations and never
+part of the adjustment.
 
 ## Load traverse data
 
@@ -56,7 +59,7 @@ before the closing leg, and the closing leg is measured on the plan too. Esc sto
 | CSV, TXT (comma, tab, semicolon or space separated) | With a heading row, the columns are found by name: `Station, Backsight, Angle, Distance, Ht diff, Easting, Northing, Name, Description, Side`. Without one, the columns are read in the order `Station, Backsight, Angle, Distance, Easting, Northing, Name, Description`. A row with Easting and Northing but no angle or distance has them worked back from the coordinates. |
 | JSON | A job saved with **Save**. |
 
-Drag a file onto the window, or press **Load traverse data** (Ctrl+O).
+Drag a file onto the window, or press **Load traverse data** (Ctrl+O). The Angle column is read as the Settings say: bearings unless you chose angles.
 
 ## Close and adjust
 
@@ -64,17 +67,13 @@ Drag a file onto the window, or press **Load traverse data** (Ctrl+O).
 |---|---|
 | Compass (Bowditch) | The misclosure is spread in proportion to the length of each leg. |
 | Transit | The misclosure in Easting and Northing is spread in proportion to each leg's ΔE and ΔN. |
-| Least squares | Angles and distances are weighted by their standard errors (σ angle, σ distance + ppm) and adjusted together. Shows residuals, standardised residuals (over 3 is flagged), a chi-square test and the 95% error ellipse of every station. Needs a closed traverse. |
+| Least squares | Angles and distances are weighted by their standard errors and adjusted together, with residuals, a chi-square test and the 95% error ellipse of every station. Needs a closed traverse. |
 
-The angular misclosure is spread equally over the observed angles before Compass and Transit.
-
-**Checks**, against the tolerance of the class (*Primary*, *Secondary*, *Tertiary* or your own):
-
-| Check | Allowed |
-|---|---|
-| Angular misclosure | *K* seconds × √(number of angles): 5″, 10″, 20″ |
-| Linear precision | 1 : 20,000, 1 : 10,000, 1 : 5,000 |
-| Level misclosure | *C* mm × √(km): 8, 12, 24 mm |
+The closure table gives the precision, the error distance and direction, the area and the
+perimeter; the adjusted values give each station's coordinates, the adjusted bearing and
+distance and the corrections ΔX, ΔY. Below them, the result against the tolerance.
+**More results** opens the full checks, the angles, the least-squares statistics, the side
+shots and the plan.
 
 ## Install
 
@@ -102,7 +101,7 @@ open the program again.
 |---|---|
 | Ctrl+O | Load traverse data |
 | Ctrl+S | Save the job |
-| Esc | Stop adding points by click, close the report |
+| Esc | Close the settings or the report |
 
 ---
 

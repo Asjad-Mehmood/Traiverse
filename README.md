@@ -15,7 +15,7 @@ internet connection.
 
 ## Quick start
 
-1. **Set up.** In the row under the ribbon, type the **Station** you start on, its **Backsight**,
+1. **Set up.** In the panel at the top, type the **Station** you start on, its **Backsight**,
    the **Close point** and the **Start Easting** and **Start Northing**.
 2. **The close point decides the kind of traverse.** The start station again: a *closed loop*.
    Another known point: a *closed link* (give its coordinates in **Settings**). Empty: an *open*
@@ -30,9 +30,22 @@ internet connection.
    coordinates as CSV.
 5. **Save** (Ctrl+S) keeps the job as a file.
 
-**Add point by click** adds a row. Clicking on the plan adds a point where you click, with its
-angle and distance worked back from the plan. In a closed traverse the new point goes in before
-the closing leg, and the closing leg is measured on the plan too.
+**Add point by click** turns on adding: each click on the plan adds a point there, with its
+angle and distance worked back from the plan, and a dashed line shows the leg before you click.
+In a closed traverse the new point goes in before the closing leg, and the closing leg is
+measured on the plan too (you are asked first if it holds observed values). Esc or the button
+stops. **Add row** adds an empty row; the buttons at the end of each row insert a row above it or
+remove it.
+
+**The plan.** Scroll to zoom, drag to move, double-click or **Fit** to see it all. Point at a
+station for its coordinates; click it to find its row. The selected row's leg is highlighted.
+
+**Undo and redo** (Ctrl+Z, Ctrl+Y, or the arrows in the title bar) take back any change: a
+typed value, a removed row, a loaded file, an applied adjustment.
+
+**Step 2** shows the result against the tolerance first, with the reason when it fails, then the
+precision, error distance and direction, angular and level misclosure, area and perimeter, then
+the adjusted values. Switch between **Compass**, **Transit** and **Least squares** at the top.
 
 ## Settings
 
@@ -101,7 +114,9 @@ open the program again.
 |---|---|
 | Ctrl+O | Load traverse data |
 | Ctrl+S | Save the job |
-| Esc | Close the settings or the report |
+| Ctrl+Z / Ctrl+Y | Undo / redo |
+| Enter / Shift+Enter | Next / previous row, same column |
+| Esc | Stop adding points, close the settings or the report |
 
 ---
 

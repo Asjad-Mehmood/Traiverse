@@ -2,241 +2,438 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Traverse Pro</title>
 <style>
-* { box-sizing: border-box; }
-body { margin: 0; font: 13px Segoe UI, Arial, sans-serif; background: #f2f2f2; color: #222; }
-header { display: flex; align-items: center; gap: 10px; height: 46px; padding: 0 12px; background: #1e2a38; color: #fff; }
-.brand b { display: inline-grid; place-items: center; width: 24px; height: 24px; border: 1px solid #c6a15a; color: #c6a15a; margin-right: 6px; }
-header nav button, header > button, .ribbon button, .actions button {
-  height: 28px; border: 1px solid #c8c8c8; background: #fff; padding: 0 10px; cursor: pointer;
+:root {
+  --navy: #1b2735; --navy2: #263649; --navy3: #34465c;
+  --gold: #c6a15a; --gold2: #b38c43; --goldbg: #f8f1e2;
+  --bg: #f3f4f6; --card: #fff; --line: #e2e5ea; --line2: #eef0f3;
+  --text: #1c2430; --muted: #6a7586; --faint: #98a2b1;
+  --ok: #1d7a4b; --okbg: #e3f4ea; --bad: #b42318; --badbg: #fdebe9; --warn: #8a5a00; --warnbg: #fff4dc;
+  --adj: #1d7a4b; --sel: #fff6df;
+  --r: 10px; --sh: 0 1px 2px rgba(16, 24, 40, .06), 0 1px 3px rgba(16, 24, 40, .08);
 }
-header nav button.on { background: #c6a15a; border-color: #c6a15a; color: #1e2a38; }
-header > button { background: transparent; color: #fff; border-color: #4a5a6a; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; font: 13.5px/1.4 "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Arial, sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; }
+button, input, select { font: inherit; color: inherit; }
+svg.i { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .grow { flex: 1; }
-.ribbon { display: flex; gap: 8px; align-items: center; height: 36px; padding: 0 8px; background: #2b2b2b; color: #fff; }
-.ribbon button { background: #3a3a3a; color: #fff; border-color: #555; }
-.controls { display: flex; gap: 12px; padding: 8px; background: #fff; border-bottom: 1px solid #ddd; }
-.controls label { display: flex; align-items: center; gap: 6px; }
-input, select { height: 26px; border: 1px solid #ccc; padding: 0 6px; }
-.table-wrap { overflow: auto; background: #fff; }
-table { width: 100%; border-collapse: collapse; background: #fff; }
-th, td { border: 1px solid #e4e4e4; padding: 4px 6px; text-align: center; }
-th { background: #f6f6f6; }
-canvas { display: block; width: 100%; height: 360px; background: #fff; border-top: 1px solid #ddd; }
-.note { margin: 0; padding: 6px 10px; color: #666; }
-.dialog { margin: 10px; background: #fff; border: 1px solid #ccc; padding: 12px; }
-h1 { margin: 0 0 10px; font-size: 16px; }
-h2 { margin: 14px 0 6px; font-size: 13px; }
-.actions { display: flex; gap: 8px; margin-top: 12px; }
-.primary { background: #1e2a38 !important; color: #fff !important; border-color: #1e2a38 !important; }
+[hidden] { display: none !important; }
 
-.gold { background: #c6a15a !important; color: #1e2a38 !important; border-color: #c6a15a !important; font-weight: 700; }
+/* ---- header ---- */
+header { display: flex; align-items: center; gap: 14px; height: 54px; padding: 0 14px; background: var(--navy); color: #fff; flex: none; }
+.brand { display: flex; align-items: center; gap: 9px; font-weight: 600; font-size: 15px; white-space: nowrap; }
+.brand b { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 7px; background: var(--gold); color: var(--navy); font-size: 15px; }
+.steps { display: flex; background: var(--navy2); border-radius: 9px; padding: 3px; gap: 2px; }
+.steps button { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 14px 0 8px; border: 0; border-radius: 7px; background: transparent; color: #c9d2dd; cursor: pointer; white-space: nowrap; }
+.steps button .n { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid currentColor; font-size: 11px; font-weight: 700; }
+.steps button:hover { color: #fff; background: var(--navy3); }
+.steps button.on { background: var(--gold); color: var(--navy); font-weight: 600; }
+.steps button.on .n { background: var(--navy); color: var(--gold); border-color: var(--navy); }
+.job { width: 220px; height: 32px; border: 1px solid transparent; border-radius: 7px; background: transparent; color: #fff; padding: 0 9px; }
+.job:hover { border-color: var(--navy3); }
+.job:focus { outline: none; border-color: var(--gold); background: var(--navy2); }
+.hbtn { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 11px; border: 1px solid var(--navy3); border-radius: 7px; background: transparent; color: #fff; cursor: pointer; white-space: nowrap; }
+.hbtn:hover:not(:disabled) { background: var(--navy2); }
+.hbtn:disabled { opacity: .4; cursor: default; }
+.hbtn.icon { width: 32px; padding: 0; justify-content: center; }
+.hbtn.gold { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 600; }
+.hbtn.gold:hover { background: #d3b06c; }
 
-/* ---- additions for the engine: kept in the same look ---- */
-#plan { cursor: crosshair; }
-#body input[readonly] { background: #fafafa; color: #555; }
-input.bad { border-color: #c0392b; background: #fdecea; }
-input.adj { color: #14532d; background: #f0f8f2; }
-tr.side td { background: #fbf8f0; }
-.err { color: #8a1c10; }
-.badge { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 11px; font-weight: 600; }
-.badge.pass { background: #dcf3e3; color: #14532d; }
-.badge.fail { background: #fbdcd8; color: #8a1c10; }
-.badge.na { background: #eee; color: #555; }
-#checkLine { margin: 10px 0 0; display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
-#msg { margin: 10px 0 0; min-height: 16px; }
-details.more { margin-top: 14px; border-top: 1px solid #e4e4e4; padding-top: 8px; }
-details.more summary { cursor: pointer; color: #1e2a38; font-weight: 600; }
-details.more ul { color: #7a5300; padding-left: 20px; }
-.overlay { position: fixed; inset: 0; background: rgba(20, 28, 38, .5); display: flex; align-items: center; justify-content: center; z-index: 50; }
-.overlay[hidden] { display: none; }
-.modal { background: #fff; border: 1px solid #ccc; width: min(760px, 96vw); max-height: 92vh; overflow: auto; padding: 12px; }
-.modal h1 { display: flex; align-items: center; }
-.modal fieldset { border: 1px solid #e4e4e4; margin: 0 0 10px; padding: 6px 10px 10px; display: flex; flex-wrap: wrap; gap: 8px 14px; }
-.modal legend { font-weight: 600; padding: 0 4px; }
-.modal label { display: flex; align-items: center; gap: 6px; }
-.modal label input[type=text], .modal label input:not([type]) { width: 120px; }
-.modal .hint { width: 100%; margin: 0; color: #666; }
-.modal .actions { justify-content: flex-end; }
-.ver { color: #888; font-size: 12px; margin-right: auto; align-self: center; }
-.sheet { background: #fff; width: min(1000px, 96vw); height: 92vh; display: flex; flex-direction: column; border: 1px solid #999; }
-.sheet .bar { display: flex; gap: 8px; align-items: center; padding: 8px; background: #1e2a38; color: #fff; }
-.sheet .bar button { height: 28px; border: 1px solid #4a5a6a; background: transparent; color: #fff; padding: 0 10px; cursor: pointer; }
+/* ---- page ---- */
+main { flex: 1; overflow: auto; padding: 14px; }
+.page { max-width: 1500px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+.page > .page { width: 100%; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--sh); }
+.card-h { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--line2); min-height: 48px; flex-wrap: wrap; }
+.card-h h2 { margin: 0; font-size: 14px; font-weight: 600; }
+.sub { color: var(--muted); font-size: 12.5px; }
+
+/* buttons */
+.btn { display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 12px; border: 1px solid var(--line); border-radius: 7px; background: #fff; cursor: pointer; white-space: nowrap; }
+.btn:hover:not(:disabled) { background: #f6f7f9; border-color: #d3d8df; }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn.primary { background: var(--navy); border-color: var(--navy); color: #fff; }
+.btn.primary:hover:not(:disabled) { background: var(--navy2); }
+.btn.gold { background: var(--gold); border-color: var(--gold); color: var(--navy); font-weight: 600; }
+.btn.gold:hover { background: #d3b06c; }
+.btn.gold.on { background: var(--navy); border-color: var(--navy); color: var(--gold); }
+.btn.ghost { border-color: transparent; background: transparent; }
+.btn.ghost:hover { background: #f1f3f6; }
+.btn.sm { height: 28px; padding: 0 9px; font-size: 12.5px; }
+.sep { width: 1px; height: 22px; background: var(--line); }
+
+/* toolbar */
+.toolbar { display: flex; align-items: center; gap: 8px; padding: 9px 12px; flex-wrap: wrap; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 9px; border-radius: 12px; background: #f1f3f6; color: #475264; font-size: 12px; white-space: nowrap; }
+.pill { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 15px; font-weight: 600; font-size: 12.5px; border: 0; cursor: pointer; white-space: nowrap; }
+.pill.pass { background: var(--okbg); color: var(--ok); }
+.pill.fail { background: var(--badbg); color: var(--bad); }
+.pill.err, .pill.open { background: var(--warnbg); color: var(--warn); }
+.pill .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+
+/* setup row */
+.setup { display: grid; grid-template-columns: repeat(5, minmax(130px, 1fr)) auto; gap: 10px 14px; padding: 12px 14px; align-items: end; }
+.fld { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.fld > span { font-size: 12px; color: var(--muted); font-weight: 500; }
+.in { height: 34px; border: 1px solid var(--line); border-radius: 7px; padding: 0 10px; background: #fff; width: 100%; min-width: 0; }
+.in:hover { border-color: #cfd5dd; }
+.in:focus, select.in:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(198, 161, 90, .22); }
+.in[readonly] { background: #f7f8fa; color: var(--muted); }
+.in.bad, .cell.bad { border-color: var(--bad) !important; background: var(--badbg) !important; }
+.kind { display: flex; flex-direction: column; gap: 4px; }
+.kind > span { font-size: 12px; color: var(--muted); font-weight: 500; }
+.kind b { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border-radius: 7px; background: var(--goldbg); color: #6e5422; font-weight: 600; white-space: nowrap; }
+
+/* the list */
+.table-wrap { overflow: auto; }
+table { width: 100%; border-collapse: separate; border-spacing: 0; }
+th { position: sticky; top: 0; z-index: 1; background: #f8f9fb; color: var(--muted); font-weight: 600; font-size: 12px; text-align: left; padding: 8px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 3px 4px; border-bottom: 1px solid var(--line2); white-space: nowrap; vertical-align: middle; }
+th.r, td.r { text-align: right; }
+#list td:first-child, #list th:first-child { width: 34px; text-align: center; color: var(--faint); font-size: 12px; padding-left: 10px; }
+#list tbody tr:hover td { background: #fafbfc; }
+#list tbody tr.sel td { background: var(--sel); }
+#list tbody tr.side td { background: #fcfaf5; }
+#list tbody tr.side:hover td, #list tbody tr.side.sel td { background: var(--sel); }
+.cell { width: 100%; min-width: 70px; height: 30px; border: 1px solid transparent; border-radius: 6px; padding: 0 7px; background: transparent; }
+.cell:hover { border-color: var(--line); background: #fff; }
+.cell:focus { outline: none; border-color: var(--gold); background: #fff; box-shadow: 0 0 0 3px rgba(198, 161, 90, .2); }
+.cell.num { text-align: right; font-variant-numeric: tabular-nums; }
+.cell.calc { color: #3c4656; }
+.cell.calc.adj { color: var(--adj); font-weight: 600; }
+.cell.wide { min-width: 150px; }
+select.cell { min-width: 104px; padding: 0 4px; cursor: pointer; }
+.txt { padding: 0 8px; color: #3c4656; }
+.txt.fixed { color: var(--muted); }
+.txt.close { display: inline-flex; align-items: center; gap: 5px; color: #6e5422; font-weight: 600; }
+.ract { display: flex; gap: 2px; justify-content: flex-end; opacity: 0; transition: opacity .12s; }
+tr:hover .ract, tr.sel .ract, .ract:focus-within { opacity: 1; }
+.ibtn { display: inline-grid; place-items: center; width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); cursor: pointer; }
+.ibtn:hover { background: #eef0f3; color: var(--text); }
+.ibtn.del:hover { background: var(--badbg); color: var(--bad); }
+.empty { padding: 34px 16px; text-align: center; color: var(--muted); }
+.empty b { display: block; color: var(--text); font-size: 15px; margin-bottom: 4px; }
+.empty .row { display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+.tfoot { display: flex; align-items: center; gap: 8px; padding: 8px 12px; color: var(--muted); font-size: 12.5px; }
+
+/* plan */
+.plan-box { position: relative; }
+canvas { display: block; width: 100%; height: 400px; border-radius: 0 0 var(--r) var(--r); background:
+  linear-gradient(#fff, #fff) padding-box; }
+#plan.adding { cursor: crosshair; }
+#plan.grab { cursor: grab; }
+#plan.grabbing { cursor: grabbing; }
+.legend { display: flex; gap: 12px; color: var(--muted); font-size: 12px; flex-wrap: wrap; }
+.legend i { display: inline-block; width: 14px; height: 0; border-top: 2px solid; vertical-align: middle; margin-right: 5px; }
+.tip { position: absolute; pointer-events: none; background: var(--navy); color: #fff; padding: 6px 9px; border-radius: 7px; font-size: 12px; line-height: 1.35; box-shadow: 0 4px 14px rgba(0, 0, 0, .18); white-space: nowrap; z-index: 3; }
+.tip b { color: var(--gold); }
+.hint-bar { position: absolute; left: 12px; bottom: 10px; background: rgba(27, 39, 53, .88); color: #fff; padding: 5px 10px; border-radius: 7px; font-size: 12px; }
+
+/* step 2 */
+.ctx { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.seg { display: inline-flex; background: #f1f3f6; border-radius: 8px; padding: 3px; gap: 2px; }
+.seg button { height: 28px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; color: #475264; cursor: pointer; white-space: nowrap; }
+.seg button:hover { color: var(--text); }
+.seg button.on { background: #fff; color: var(--text); font-weight: 600; box-shadow: var(--sh); }
+.banner { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--r); font-weight: 600; }
+.banner svg.i { width: 22px; height: 22px; }
+.banner.pass { background: var(--okbg); color: var(--ok); }
+.banner.fail { background: var(--badbg); color: var(--bad); }
+.banner.open, .banner.err { background: var(--warnbg); color: var(--warn); }
+.banner .why { font-weight: 400; color: inherit; opacity: .9; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.tile { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 11px 14px; box-shadow: var(--sh); position: relative; }
+.tile .k { color: var(--muted); font-size: 12px; font-weight: 500; }
+.tile .v { font-size: 20px; font-weight: 650; margin-top: 2px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tile .s { color: var(--muted); font-size: 12px; margin-top: 1px; }
+.tile.pass { border-left: 4px solid var(--ok); }
+.tile.fail { border-left: 4px solid var(--bad); }
+.tile.pass .v { color: var(--ok); }
+.tile.fail .v { color: var(--bad); }
+#adjTable td, #adjTable th, .rt td, .rt th { padding: 7px 10px; }
+.rt td { font-variant-numeric: tabular-nums; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11.5px; font-weight: 600; }
+.badge.pass { background: var(--okbg); color: var(--ok); }
+.badge.fail { background: var(--badbg); color: var(--bad); }
+.badge.na { background: #eef0f3; color: var(--muted); }
+.flag { color: var(--bad); font-weight: 600; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; padding: 12px 14px; border-top: 1px solid var(--line2); }
+details.more > summary { list-style: none; cursor: pointer; }
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary .chev { transition: transform .15s; }
+details.more[open] > summary .chev { transform: rotate(90deg); }
+.more-body { padding: 4px 14px 14px; }
+.more-body h3 { margin: 16px 0 6px; font-size: 13px; }
+.more-body ul { color: var(--warn); padding-left: 20px; }
+#plan2 { height: 360px; border: 1px solid var(--line); border-radius: 8px; margin-top: 6px; }
+.errbox { padding: 16px; color: var(--warn); background: var(--warnbg); border-radius: var(--r); display: flex; gap: 10px; align-items: flex-start; }
+
+/* status bar */
+footer { display: flex; align-items: center; gap: 12px; height: 28px; padding: 0 14px; background: #fff; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; flex: none; }
+
+/* overlays */
+.overlay { position: fixed; inset: 0; background: rgba(15, 22, 32, .45); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 16px; }
+.modal { background: #fff; border-radius: 14px; width: min(820px, 100%); max-height: 100%; display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0, 0, 0, .25); }
+.modal-h { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--line2); }
+.modal-h h2 { margin: 0; font-size: 16px; }
+.modal-b { padding: 6px 18px 12px; overflow: auto; }
+.modal-f { display: flex; gap: 8px; padding: 12px 18px; border-top: 1px solid var(--line2); align-items: center; }
+.sec { padding: 12px 0; border-bottom: 1px solid var(--line2); }
+.sec:last-child { border-bottom: 0; }
+.sec h3 { margin: 0 0 10px; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px 12px; }
+.grid .fld.w2 { grid-column: span 2; }
+.check { display: flex; align-items: center; gap: 8px; height: 34px; cursor: pointer; }
+.check input { width: 16px; height: 16px; accent-color: var(--navy); }
+.note { color: var(--muted); font-size: 12.5px; margin: 8px 0 0; }
+.ver { color: var(--faint); font-size: 12px; }
+.sheet { background: #fff; width: min(1040px, 100%); height: 100%; display: flex; flex-direction: column; border-radius: 14px; overflow: hidden; box-shadow: 0 20px 50px rgba(0, 0, 0, .25); }
 .sheet iframe { flex: 1; border: 0; width: 100%; background: #fff; }
-.upd { background: #fff; padding: 22px 26px; width: 380px; border-top: 4px solid #c6a15a; }
+.upd { background: #fff; padding: 22px 26px; width: 380px; border-radius: 14px; border-top: 4px solid var(--gold); }
 .upd h3 { margin: 0 0 8px; font-size: 15px; }
 .upd p { margin: 0; color: #444; }
-.toast { position: fixed; right: 14px; bottom: 14px; background: #1e2a38; color: #fff; padding: 8px 12px; border-left: 4px solid #c6a15a; max-width: 440px; z-index: 60; }
-.toast[hidden] { display: none; }
+.toast { position: fixed; right: 16px; bottom: 40px; background: var(--navy); color: #fff; padding: 10px 14px; border-radius: 9px; border-left: 4px solid var(--gold); max-width: 460px; z-index: 60; box-shadow: 0 8px 24px rgba(0, 0, 0, .2); }
+
+@media (max-width: 1000px) {
+  .setup { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .job { display: none; }
+  .steps button .t { display: none; }
+}
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-open" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-save" viewBox="0 0 24 24"><path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M7 3v5h8V3M7 21v-7h10v7"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-click" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+  <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></symbol>
+  <symbol id="i-redo" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h3"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+  <symbol id="i-insert" viewBox="0 0 24 24"><path d="M12 4v8M8 8h8M4 18h16"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17v.5"/></symbol>
+  <symbol id="i-report" viewBox="0 0 24 24"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></symbol>
+  <symbol id="i-csv" viewBox="0 0 24 24"><path d="M4 5h16v14H4zM4 10h16M4 15h16M10 5v14"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+  <symbol id="i-apply" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></symbol>
+  <symbol id="i-fit" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+  <symbol id="i-print" viewBox="0 0 24 24"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M7 14h10v7H7z"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+</svg>
+
 <header>
   <div class="brand"><b>T</b> Traverse Pro</div>
-  <nav>
-    <button id="tab1" class="on">1  Load and list</button>
-    <button id="tab2">2  Close and adjust</button>
+  <nav class="steps" aria-label="Steps">
+    <button id="tab1" class="on" type="button"><span class="n">1</span><span class="t">Load and list</span></button>
+    <button id="tab2" type="button"><span class="n">2</span><span class="t">Close and adjust</span></button>
   </nav>
+  <input id="job" class="job" data-s="job" aria-label="Job name" title="Job name: files are saved under it">
   <div class="grow"></div>
-  <button id="setBtn" title="Angles, backsight, closing, tolerance">Settings</button>
-  <button id="saveBtn" title="Save the job (Ctrl+S)">Save</button>
+  <button id="undoBtn" class="hbtn icon" type="button" title="Undo (Ctrl+Z)" aria-label="Undo"><svg class="i"><use href="#i-undo"/></svg></button>
+  <button id="redoBtn" class="hbtn icon" type="button" title="Redo (Ctrl+Y)" aria-label="Redo"><svg class="i"><use href="#i-redo"/></svg></button>
+  <button id="setBtn" class="hbtn" type="button" title="Angles, backsight, closing, tolerance"><svg class="i"><use href="#i-gear"/></svg>Settings</button>
+  <button id="saveBtn" class="hbtn gold" type="button" title="Save the job (Ctrl+S)"><svg class="i"><use href="#i-save"/></svg>Save</button>
 </header>
 
-<section id="step1">
-  <div class="ribbon">
-    <button id="loadBtn" title="CSV, TXT or a saved job (Ctrl+O)">Load traverse data</button>
-    <input id="file" type="file" accept=".csv,.txt,.json" hidden>
-    <button id="addBtn" class="gold" title="Add a row, or click on the plan to add a point there">Add point by click</button>
-    <span>Points and Lines</span>
+<main>
+<div class="page">
+<section id="step1" class="page">
+  <div class="card">
+    <div class="toolbar">
+      <button id="loadBtn" class="btn" type="button" title="CSV, TXT or a saved job (Ctrl+O)"><svg class="i"><use href="#i-open"/></svg>Load traverse data</button>
+      <input id="file" type="file" accept=".csv,.txt,.json" hidden>
+      <button id="addBtn" class="btn gold" type="button" aria-pressed="false" title="Then click on the plan to add a point there"><svg class="i"><use href="#i-click"/></svg><span>Add point by click</span></button>
+      <button id="rowBtn" class="btn" type="button" title="Add a row to the list"><svg class="i"><use href="#i-plus"/></svg>Add row</button>
+      <span class="sep"></span>
+      <div class="chips" id="chips"></div>
+      <span class="grow"></span>
+      <button id="statusPill" class="pill" type="button" title="Open Close and adjust"></button>
+    </div>
+    <div class="setup">
+      <label class="fld"><span>Station</span><input id="station" class="in" data-s="station"></label>
+      <label class="fld"><span>Backsight</span><input id="backsight" class="in" data-s="backsight"></label>
+      <label class="fld"><span>Close point</span><input id="closePoint" class="in" data-s="closePoint" placeholder="empty: open traverse"></label>
+      <label class="fld"><span>Start Easting</span><input id="startE" class="in" data-s="startE" data-n></label>
+      <label class="fld"><span>Start Northing</span><input id="startN" class="in" data-s="startN" data-n></label>
+      <div class="kind"><span>Traverse</span><b id="kindTag"></b></div>
+    </div>
   </div>
-  <div class="controls">
-    <label>Station <input id="station" data-s="station"></label>
-    <label>Backsight <input id="backsight" data-s="backsight"></label>
-    <label>Close point <input id="closePoint" data-s="closePoint"></label>
-    <label>Start Easting <input id="startE" data-s="startE" data-n></label>
-    <label>Start Northing <input id="startN" data-s="startN" data-n></label>
+
+  <div class="card">
+    <div class="card-h"><h2>Points and Lines</h2><span class="sub" id="listSub"></span></div>
+    <div class="table-wrap">
+      <table id="list">
+        <thead>
+          <tr>
+            <th></th><th>Side</th><th>Station</th><th>Backsight</th><th id="angHead">Angle</th><th class="r">Distance</th><th class="r lv">Ht diff</th>
+            <th class="r">Easting</th><th class="r">Northing</th><th class="r lv">Level</th><th>Name</th><th>Description</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="body"></tbody>
+      </table>
+    </div>
+    <div class="tfoot" id="tfoot"></div>
   </div>
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th></th><th>Side</th><th>Station</th><th>Backsight</th><th>Angle</th><th>Distance</th><th class="lv">Ht diff</th>
-          <th>Easting</th><th>Northing</th><th class="lv">Level</th><th>Name</th><th>Description</th><th></th>
-        </tr>
-      </thead>
-      <tbody id="body"></tbody>
-    </table>
+
+  <div class="card">
+    <div class="card-h">
+      <h2>Plan</h2>
+      <div class="legend"><span><i style="border-color:#1b2735"></i>Traverse</span><span><i style="border-color:#1d7a4b"></i>Adjusted</span><span><i style="border-color:#c6a15a;border-top-style:dashed"></i>Side shot</span><span><i style="border-color:#b42318"></i>Misclosure</span></div>
+      <span class="grow"></span>
+      <button id="fitBtn" class="btn sm ghost" type="button" title="Fit the whole traverse (double-click the plan)"><svg class="i"><use href="#i-fit"/></svg>Fit</button>
+    </div>
+    <div class="plan-box">
+      <canvas id="plan"></canvas>
+      <div id="tip" class="tip" hidden></div>
+      <div id="planHint" class="hint-bar" hidden></div>
+    </div>
   </div>
-  <canvas id="plan"></canvas>
-  <p class="note">Add each point by click, or load a full traverse file. Easting and Northing are the coordinates.</p>
 </section>
 
-<section id="step2" hidden>
-  <div class="dialog">
-    <h1>Close and adjusted values</h1>
-    <div class="controls">
-      <label>Station <input id="station2" readonly></label>
-      <label>Backsight <input id="backsight2" readonly></label>
-      <label>Close point <input id="closePoint2" readonly></label>
-      <label>Adjustment
-        <select id="method"><option value="bowditch">Compass</option><option value="transit">Transit</option><option value="lsq">Least squares</option></select>
-      </label>
-    </div>
-    <div id="closeOut">
-      <h2>Closure</h2>
-      <table>
-        <thead><tr><th>Name</th><th>Precision</th><th>Error Distance</th><th>Error Direction</th><th>Area</th><th>Perimeter</th></tr></thead>
-        <tbody id="summary"></tbody>
-      </table>
-      <h2>Adjusted values</h2>
-      <div class="table-wrap">
-        <table>
-          <thead id="adjHead"></thead>
-          <tbody id="adj"></tbody>
-        </table>
+<section id="step2" class="page" hidden>
+  <div class="card">
+    <div class="card-h">
+      <h2>Close and adjusted values</h2>
+      <div class="ctx" id="ctx"></div>
+      <span class="grow"></span>
+      <div class="seg" id="methodSeg" role="group" aria-label="Adjustment">
+        <button type="button" data-method="bowditch">Compass</button>
+        <button type="button" data-method="transit">Transit</button>
+        <button type="button" data-method="lsq">Least squares</button>
       </div>
     </div>
-    <div class="actions">
-      <button id="applyBtn" class="primary">Apply Adjustment</button>
-      <button id="reportBtn">Generate Report</button>
-      <button id="backBtn">Back to list</button>
+    <div style="padding:12px 14px;display:flex;flex-direction:column;gap:12px">
+      <div id="banner"></div>
+      <div class="tiles" id="tiles"></div>
     </div>
-    <div id="checkLine"></div>
-    <p id="msg"></p>
-    <details class="more" id="more">
-      <summary>More results: checks, angles, least squares, side shots</summary>
-      <h2>Checks</h2>
-      <table>
-        <thead><tr><th>Check</th><th>Found</th><th>Allowed</th><th>Result</th></tr></thead>
-        <tbody id="checks"></tbody>
+  </div>
+
+  <div class="card" id="adjCard">
+    <div class="card-h"><h2>Adjusted values</h2><span class="sub" id="adjSub"></span></div>
+    <div class="table-wrap">
+      <table id="adjTable" class="rt">
+        <thead id="adjHead"></thead>
+        <tbody id="adj"></tbody>
       </table>
+    </div>
+    <div class="actions">
+      <button id="applyBtn" class="btn primary" type="button"><svg class="i"><use href="#i-apply"/></svg>Apply Adjustment</button>
+      <button id="reportBtn" class="btn" type="button"><svg class="i"><use href="#i-report"/></svg>Generate Report</button>
+      <button id="csv2Btn" class="btn" type="button"><svg class="i"><use href="#i-csv"/></svg>Coordinates CSV</button>
+      <span class="grow"></span>
+      <button id="backBtn" class="btn ghost" type="button"><svg class="i"><use href="#i-back"/></svg>Back to list</button>
+    </div>
+  </div>
+
+  <details class="card more" id="more">
+    <summary class="card-h"><svg class="i chev"><use href="#i-chev"/></svg><h2>More results</h2><span class="sub">checks, angles, least squares, side shots, plan</span></summary>
+    <div class="more-body">
+      <h3>Checks</h3>
+      <table class="rt"><thead><tr><th>Check</th><th>Found</th><th>Allowed</th><th>Result</th></tr></thead><tbody id="checks"></tbody></table>
       <div id="lsqBox"></div>
-      <h2>Angles</h2>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Station</th><th>Backsight</th><th>Foresight</th><th>Observed</th><th>Correction</th><th>Adjusted</th></tr></thead>
-          <tbody id="angles"></tbody>
-        </table>
+      <div id="angBox"><h3>Angles</h3>
+        <table class="rt"><thead><tr><th>Station</th><th>Backsight</th><th>Foresight</th><th class="r">Observed</th><th class="r">Correction</th><th class="r">Adjusted</th></tr></thead><tbody id="angles"></tbody></table>
       </div>
       <div id="sideBox"></div>
       <ul id="warnBox"></ul>
+      <h3>Plan, adjusted</h3>
       <canvas id="plan2"></canvas>
-    </details>
-  </div>
+    </div>
+  </details>
 </section>
+</div>
+</main>
+
+<footer><span id="footTx"></span><span class="grow"></span><span class="ver">Traverse Pro dev</span></footer>
 
 <div id="setOverlay" class="overlay" hidden>
   <div class="modal" role="dialog" aria-label="Settings">
-    <h1>Settings</h1>
-    <fieldset>
-      <legend>Job</legend>
-      <label>Name <input data-s="job" style="width:240px"></label>
-      <p class="hint" id="kindHint"></p>
-    </fieldset>
-    <fieldset>
-      <legend>Angles</legend>
-      <label>The Angle column holds
-        <select data-s="angleMode"><option value="bearing">Bearings</option><option value="angle">Angles turned from the backsight</option></select></label>
-      <label>Typed as
-        <select data-s="fmt"><option value="deg">Decimal degrees</option><option value="dms">DDD.MMSS</option><option value="gon">Gons</option></select></label>
-      <label class="am">Turned
-        <select data-s="angleDir"><option value="cw">Clockwise</option><option value="ccw">Anticlockwise</option></select></label>
-      <label>Scale factor <input data-s="scale" data-n></label>
-    </fieldset>
-    <fieldset class="am">
-      <legend>Backsight</legend>
-      <label>Orientation
-        <select data-s="bsMode"><option value="point">Backsight point</option><option value="bearing">Bearing</option></select></label>
-      <label class="bs-pt">Easting <input data-s="bsE" data-n></label>
-      <label class="bs-pt">Northing <input data-s="bsN" data-n></label>
-      <label class="bs-brg">Bearing to it <input data-s="bsBrg" data-a></label>
-    </fieldset>
-    <fieldset class="cl-any">
-      <legend>Close</legend>
-      <label class="cl-link">Close point Easting <input data-s="closeE" data-n></label>
-      <label class="cl-link">Northing <input data-s="closeN" data-n></label>
-      <label class="cl-link lv">Level <input data-s="closeH" data-n></label>
-      <label class="am cl-closed">Closing orientation
-        <select data-s="closeMode"><option value="point" id="closePointOpt">Back onto the backsight</option><option value="bearing">Bearing</option><option value="none">None</option></select></label>
-      <label class="am fs-pt">Foresight <input data-s="fsName"></label>
-      <label class="am fs-pt">Easting <input data-s="fsE" data-n></label>
-      <label class="am fs-pt">Northing <input data-s="fsN" data-n></label>
-      <label class="am fs-brg">Bearing to it <input data-s="fsBrg" data-a></label>
-      <label class="am fs-ang">Closing angle <input data-s="closeAngle" data-a></label>
-    </fieldset>
-    <fieldset>
-      <legend>Tolerance</legend>
-      <label>Class
-        <select data-s="cls"><option value="primary">Primary</option><option value="secondary">Secondary</option><option value="tertiary">Tertiary</option><option value="custom">Custom</option></select></label>
-      <label class="am">Angular ″ × √n <input data-s="tol.angK" data-n style="width:60px"></label>
-      <label>Precision 1 : <input data-s="tol.ratio" data-n style="width:80px"></label>
-      <label><input type="checkbox" data-s="useH"> Carry levels</label>
-      <label class="lv">Start level <input data-s="startH" data-n style="width:90px"></label>
-      <label class="lv">Levels mm × √km <input data-s="tol.hC" data-n style="width:60px"></label>
-    </fieldset>
-    <fieldset>
-      <legend>Least squares</legend>
-      <label>σ angle ″ <input data-s="sigma.ang" data-n style="width:60px"></label>
-      <label>σ distance mm <input data-s="sigma.dA" data-n style="width:60px"></label>
-      <label>+ ppm <input data-s="sigma.dB" data-n style="width:60px"></label>
-    </fieldset>
-    <div class="actions">
-      <span class="ver">Traverse Pro dev</span>
-      <button id="newBtn">New traverse</button>
-      <button id="sampleBtn">Load the sample loop</button>
-      <button id="setClose" class="primary">Done</button>
+    <div class="modal-h"><h2>Settings</h2><span class="sub" id="kindHint"></span><span class="grow"></span>
+      <button id="setX" class="ibtn" type="button" aria-label="Close"><svg class="i"><use href="#i-close"/></svg></button></div>
+    <div class="modal-b">
+      <div class="sec">
+        <h3>Angles</h3>
+        <div class="grid">
+          <label class="fld w2"><span>The Angle column holds</span>
+            <select class="in" data-s="angleMode"><option value="bearing">Bearings (whole-circle, from north)</option><option value="angle">Angles turned from the backsight</option></select></label>
+          <label class="fld"><span>Typed as</span>
+            <select class="in" data-s="fmt"><option value="deg">Decimal degrees</option><option value="dms">DDD.MMSS</option><option value="gon">Gons</option></select></label>
+          <label class="fld am"><span>Turned</span>
+            <select class="in" data-s="angleDir"><option value="cw">Clockwise</option><option value="ccw">Anticlockwise</option></select></label>
+          <label class="fld"><span>Scale factor</span><input class="in" data-s="scale" data-n></label>
+        </div>
+        <p class="note" id="angNote"></p>
+      </div>
+      <div class="sec am">
+        <h3>Backsight</h3>
+        <div class="grid">
+          <label class="fld"><span>Orientation</span>
+            <select class="in" data-s="bsMode"><option value="point">Backsight point</option><option value="bearing">Bearing to it</option></select></label>
+          <label class="fld bs-pt"><span>Backsight Easting</span><input class="in" data-s="bsE" data-n></label>
+          <label class="fld bs-pt"><span>Backsight Northing</span><input class="in" data-s="bsN" data-n></label>
+          <label class="fld bs-brg"><span>Bearing to the backsight</span><input class="in" data-s="bsBrg" data-a></label>
+        </div>
+      </div>
+      <div class="sec cl-any">
+        <h3>Close</h3>
+        <div class="grid">
+          <label class="fld cl-link"><span>Close point Easting</span><input class="in" data-s="closeE" data-n></label>
+          <label class="fld cl-link"><span>Close point Northing</span><input class="in" data-s="closeN" data-n></label>
+          <label class="fld cl-link lv"><span>Close point level</span><input class="in" data-s="closeH" data-n></label>
+          <label class="fld am cl-closed"><span>Closing orientation</span>
+            <select class="in" data-s="closeMode"><option value="point" id="closePointOpt">Back onto the backsight</option><option value="bearing">Bearing</option><option value="none">None</option></select></label>
+          <label class="fld am fs-pt"><span>Foresight</span><input class="in" data-s="fsName"></label>
+          <label class="fld am fs-pt"><span>Foresight Easting</span><input class="in" data-s="fsE" data-n></label>
+          <label class="fld am fs-pt"><span>Foresight Northing</span><input class="in" data-s="fsN" data-n></label>
+          <label class="fld am fs-brg"><span>Bearing to the foresight</span><input class="in" data-s="fsBrg" data-a></label>
+          <label class="fld am fs-ang"><span>Closing angle</span><input class="in" data-s="closeAngle" data-a></label>
+        </div>
+      </div>
+      <div class="sec">
+        <h3>Tolerance</h3>
+        <div class="grid">
+          <label class="fld"><span>Class</span>
+            <select class="in" data-s="cls"><option value="primary">Primary</option><option value="secondary">Secondary</option><option value="tertiary">Tertiary</option><option value="custom">Custom</option></select></label>
+          <label class="fld am"><span>Angular, ″ × √n</span><input class="in" data-s="tol.angK" data-n></label>
+          <label class="fld"><span>Precision, 1 :</span><input class="in" data-s="tol.ratio" data-n></label>
+          <label class="check"><input type="checkbox" data-s="useH"> Carry levels</label>
+          <label class="fld lv"><span>Start level</span><input class="in" data-s="startH" data-n></label>
+          <label class="fld lv"><span>Levels, mm × √km</span><input class="in" data-s="tol.hC" data-n></label>
+        </div>
+      </div>
+      <div class="sec">
+        <h3>Least squares weights</h3>
+        <div class="grid">
+          <label class="fld"><span>σ angle, ″</span><input class="in" data-s="sigma.ang" data-n></label>
+          <label class="fld"><span>σ distance, mm</span><input class="in" data-s="sigma.dA" data-n></label>
+          <label class="fld"><span>+ ppm</span><input class="in" data-s="sigma.dB" data-n></label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-f">
+      <span class="ver">Traverse Pro dev</span><span class="grow"></span>
+      <button id="newBtn" class="btn" type="button">New traverse</button>
+      <button id="sampleBtn" class="btn" type="button">Load the sample loop</button>
+      <button id="setClose" class="btn primary" type="button">Done</button>
     </div>
   </div>
 </div>
 
 <div id="reportOverlay" class="overlay" hidden>
   <div class="sheet" role="dialog" aria-label="Report">
-    <div class="bar"><b>Report</b><span class="grow"></span>
-      <button id="printBtn" title="Print, or choose Microsoft Print to PDF">Print or PDF</button>
-      <button id="saveRepBtn">Save report</button>
-      <button id="csvBtn">Coordinates CSV</button>
-      <button id="closeRepBtn">Close</button>
+    <div class="modal-h"><h2>Report</h2><span class="grow"></span>
+      <button id="printBtn" class="btn gold" type="button" title="Print, or choose Microsoft Print to PDF"><svg class="i"><use href="#i-print"/></svg>Print or PDF</button>
+      <button id="saveRepBtn" class="btn" type="button"><svg class="i"><use href="#i-save"/></svg>Save report</button>
+      <button id="csvBtn" class="btn" type="button"><svg class="i"><use href="#i-csv"/></svg>Coordinates CSV</button>
+      <button id="closeRepBtn" class="ibtn" type="button" aria-label="Close"><svg class="i"><use href="#i-close"/></svg></button>
     </div>
     <iframe id="reportFrame" title="Report preview"></iframe>
   </div>
@@ -910,6 +1107,10 @@ var SURV = (function () {
     }
     if (L.tr.length < 1) throw new Error("Add the first point.");
     if (closed() && L.tr.length < 2) throw new Error("A closed traverse needs at least two legs.");
+    if (!closed() && L.names.slice(1).indexOf(L.names[0]) >= 0)
+      throw new Error("A point has the start station's name, " + L.names[0] + ". To close the loop on it, type " + L.names[0] + " as the Close point; otherwise rename the point.");
+    if (S.type === "link" && L.names.slice(1, -1).indexOf(closeName()) >= 0)
+      throw new Error("The close point " + closeName() + " is also the name of a point along the way. Rename one of them.");
     var n = L.names.length, label = function (k) { return L.names[k] || "row " + (k + 1); };
     /* with bearings in the list, the angle at each station is the bearing on less the bearing back */
     var angs = [], prev = saz;
@@ -992,6 +1193,27 @@ var SURV = (function () {
     return { st: provisional().st, adj: false };
   }
 
+
+  /* ---------- undo and redo: a copy of the job before each change ---------- */
+  var UNDO = [], REDO = [], lastMark = 0, lastKey = "";
+  /* typing in one box is one step; a pause, another box or any other change starts a new one */
+  function remember(key) {
+    var now = Date.now();
+    if (key && key === lastKey && now - lastMark < 1500) { lastMark = now; return; }
+    UNDO.push(JSON.stringify(S));
+    if (UNDO.length > 100) UNDO.shift();
+    REDO = [];
+    lastMark = now; lastKey = key || "";
+    undoButtons();
+  }
+  function restore(from, to) {
+    if (!from.length) return;
+    to.push(JSON.stringify(S));
+    S = Object.assign(defaults(), JSON.parse(from.pop()));
+    syncType(); RUN = null; lastKey = ""; save(); renderAll(); undoButtons();
+  }
+  function undoButtons() { $("undoBtn").disabled = !UNDO.length; $("redoBtn").disabled = !REDO.length; }
+
   function changed(structural) {
     RUN = null;
     S.adjusted = null;
@@ -999,7 +1221,7 @@ var SURV = (function () {
     if (structural) renderAll(); else refresh();
   }
 
-  /* ---------- the controls row and the settings ---------- */
+  /* ---------- the setup row and the settings ---------- */
   function renderSetup() {
     document.querySelectorAll("[data-s]").forEach(function (el) {
       var v = getPath(el.dataset.s);
@@ -1020,13 +1242,19 @@ var SURV = (function () {
     show(".lv", !!S.useH);
     if (S.type !== "link") document.querySelectorAll(".cl-link.lv").forEach(function (el) { el.style.display = "none"; });
     $("closePointOpt").textContent = S.type === "loop" ? "Back onto the backsight" : "Foresight point";
-    $("kindHint").textContent = TYPE[S.type] + ": " + (S.type === "loop" ? "the Close point is the start station." :
-      S.type === "link" ? "the Close point " + closeName() + " is another known point; give its coordinates under Close." :
-        "no Close point, so there is no check.");
-    $("method").value = S.method;
+    $("kindTag").textContent = TYPE[S.type];
+    $("kindTag").title = S.type === "loop" ? "The Close point is the start station" : S.type === "link" ? "The Close point is another known point: its coordinates are in Settings" : "No Close point: there is no check";
+    $("kindHint").textContent = TYPE[S.type] + (S.type === "link" ? " to " + closeName() : "");
+    $("angNote").textContent = bearings()
+      ? "Each row's Angle is the bearing of the line to the new point. There is no angular check: the closure is the linear one."
+      : "Each row's Angle is turned at the Station from the Backsight to the new point. The closing angle at the close point gives the angular check.";
+    $("angHead").textContent = bearings() ? "Bearing" : "Angle";
+    document.querySelectorAll("#methodSeg [data-method]").forEach(function (b) { b.classList.toggle("on", b.dataset.method === S.method); });
   }
   function onSetup(el) {
     var q = el.dataset.s, v = el.type === "checkbox" ? el.checked : el.value;
+    var structural = el.tagName === "SELECT" || el.type === "checkbox" || q === "station" || q === "closePoint" || q === "backsight";
+    remember(structural && el.tagName !== "INPUT" ? "" : "s:" + q);
     if (q === "cls") {
       S.cls = v;
       if (DEF_TOL[v]) S.tol = Object.assign({}, DEF_TOL[v]);
@@ -1039,55 +1267,96 @@ var SURV = (function () {
     syncType();
     if (el.matches("[data-n]")) el.classList.toggle("bad", tn(v) !== null && !ok(tn(v)));
     if (el.matches("[data-a]")) el.classList.toggle("bad", String(v).trim() !== "" && readAngle(v) === null);
-    var structural = el.tagName === "SELECT" || el.type === "checkbox" || q === "station" || q === "closePoint" || q === "backsight";
+    if (q === "job") { save(); foot(); return; }
     changed(structural);
   }
 
   /* ---------- step 1: the list ---------- */
-  function cell(i, k, v, ro) {
-    return '<td><input data-i="' + i + '" data-k="' + k + '" value="' + esc(v) + '"' + (ro ? " readonly" : "") + "></td>";
+  var SEL = -1;
+  function inputCell(i, k, v, cls, extra) {
+    return '<td><input class="cell ' + (cls || "") + '" data-i="' + i + '" data-k="' + k + '" value="' + esc(v) + '"' + (extra || "") + "></td>";
   }
   function renderTable() {
-    var L = layout();
+    var L = layout(), nc = 11 + (S.useH ? 2 : 0);
+    if (!S.rows.length) {
+      $("body").innerHTML = '<tr><td colspan="' + nc + '"><div class="empty"><b>No points yet</b>Load a traverse file, add rows and type the angles and distances, or press Add point by click and click on the plan.' +
+        '<div class="row"><button class="btn" type="button" data-empty="load"><svg class="i"><use href="#i-open"/></svg>Load traverse data</button>' +
+        '<button class="btn" type="button" data-empty="row"><svg class="i"><use href="#i-plus"/></svg>Add row</button>' +
+        '<button class="btn" type="button" data-empty="sample">Load the sample loop</button></div></div></td></tr>';
+      refresh();
+      return;
+    }
     $("body").innerHTML = S.rows.map(function (r, i) {
-      var inf = L.info[i], side = inf.kind === "s", first = inf.kind === "t" && inf.k === 0;
-      return '<tr class="' + (side ? "side" : "") + '" data-row="' + i + '">' +
+      var inf = L.info[i], side = inf.kind === "s";
+      var nameCell = inf.closing
+        ? '<td><span class="txt close" title="A closed traverse ends on its Close point">' + esc(inf.to || "—") + "</span></td>"
+        : inputCell(i, "name", r.name, "", ' aria-label="Name, row ' + (i + 1) + '"');
+      var calc = function (k) { return inputCell(i, k, "", "num calc", (inf.closing ? " readonly" : "") + ' aria-label="' + (k === "east" ? "Easting" : "Northing") + ", row " + (i + 1) + '" title="' + (inf.closing ? "Where the observations arrive; the close point is fixed" : "Type a coordinate to work out the angle and distance") + '"'); };
+      return '<tr class="' + (side ? "side" : "") + (i === SEL ? " sel" : "") + '" data-row="' + i + '">' +
         "<td>" + (i + 1) + "</td>" +
-        '<td><select data-i="' + i + '" data-k="side"><option' + (side ? "" : " selected") + ">" + POINT + "</option><option" + (side ? " selected" : "") + ">" + SIDE + "</option></select></td>" +
-        cell(i, "station", inf.station, !first) + cell(i, "bs", inf.bs, !first) +
-        cell(i, "angle", r.angle) + cell(i, "distance", r.distance) +
-        (S.useH ? cell(i, "dh", r.dh) : "") +
-        cell(i, "east", "") + cell(i, "north", "") + (S.useH ? cell(i, "level", "", true) : "") +
-        cell(i, "name", inf.closing ? inf.to : r.name, inf.closing) + cell(i, "desc", r.desc) +
-        '<td><button data-del="' + i + '">Remove</button></td></tr>';
+        '<td><select class="cell" data-i="' + i + '" data-k="side" aria-label="Side, row ' + (i + 1) + '"><option' + (side ? "" : " selected") + ">" + POINT + "</option><option" + (side ? " selected" : "") + ">" + SIDE + "</option></select></td>" +
+        '<td><span class="txt" data-c="station"></span></td><td><span class="txt fixed" data-c="bs"></span></td>' +
+        inputCell(i, "angle", r.angle, "", ' aria-label="' + (bearings() ? "Bearing" : "Angle") + ", row " + (i + 1) + '"') +
+        inputCell(i, "distance", r.distance, "num", ' aria-label="Distance, row ' + (i + 1) + '"') +
+        (S.useH ? inputCell(i, "dh", r.dh, "num", ' aria-label="Height difference, row ' + (i + 1) + '"') : "") +
+        calc("east") + calc("north") +
+        (S.useH ? '<td class="r"><span class="txt" data-c="level"></span></td>' : "") +
+        nameCell + inputCell(i, "desc", r.desc, "wide", ' aria-label="Description, row ' + (i + 1) + '"') +
+        '<td><div class="ract"><button class="ibtn" type="button" data-ins="' + i + '" title="Insert a row above" aria-label="Insert a row above row ' + (i + 1) + '"><svg class="i"><use href="#i-insert"/></svg></button>' +
+        '<button class="ibtn del" type="button" data-del="' + i + '" title="Remove this row" aria-label="Remove row ' + (i + 1) + '"><svg class="i"><use href="#i-trash"/></svg></button></div></td></tr>';
     }).join("");
     refresh();
   }
-  /* the worked-out boxes only, so typing is never interrupted */
+  /* the worked-out parts only, so typing is never interrupted */
   function refresh() {
     var L = layout(), sh = shownStations(), sides = sideShots(L, sh.st), byRow = {};
     sides.forEach(function (s) { byRow[s.i] = s; });
     document.querySelectorAll("#body tr[data-row]").forEach(function (tr) {
       var i = +tr.dataset.row, inf = L.info[i], q = inf.kind === "t" ? sh.st[inf.k + 1] : byRow[i];
-      var set = function (k, v) {
+      var txt = function (c, v) { var el = tr.querySelector('[data-c="' + c + '"]'); if (el) el.textContent = v; };
+      var val = function (k, v) {
         var el = tr.querySelector('[data-k="' + k + '"]');
-        if (el && document.activeElement !== el) el.value = v;
-        if (el && (k === "east" || k === "north" || k === "level")) el.classList.toggle("adj", sh.adj);
+        if (!el) return;
+        if (document.activeElement !== el) el.value = v;
+        el.classList.toggle("adj", sh.adj);
       };
-      set("station", inf.station || ""); set("bs", inf.bs || "");
-      if (inf.closing) set("name", inf.to || "");
-      set("east", q && ok(q.E) ? f(q.E, 3) : ""); set("north", q && ok(q.N) ? f(q.N, 3) : ""); set("level", q && ok(q.H) ? f(q.H, 3) : "");
+      txt("station", inf.station || "—"); txt("bs", inf.bs || "—");
+      txt("level", q && ok(q.H) ? f(q.H, 3) : "");
+      val("east", q && ok(q.E) ? f(q.E, 3) : ""); val("north", q && ok(q.N) ? f(q.N, 3) : "");
       tr.querySelectorAll("input[data-k]").forEach(function (el) {
         var k = el.dataset.k, v = el.value;
         var bad = (k === "angle" && String(v).trim() !== "" && readAngle(v) === null) ||
-          ((k === "distance" || k === "dh" || k === "east" || k === "north") && tn(v) !== null && !ok(tn(v)));
+          ((k === "distance" || k === "dh" || k === "east" || k === "north") && tn(v) !== null && !ok(tn(v))) ||
+          (k === "distance" && ok(tn(v)) && tn(v) <= 0);
         el.classList.toggle("bad", !!bad);
       });
     });
+    var nT = L.tr.length, nS = S.rows.length - nT, R = run(), st = status(R);
+    $("chips").innerHTML = ['<span class="chip">' + nT + " leg" + (nT === 1 ? "" : "s") + "</span>", nS ? '<span class="chip">' + nS + " side shot" + (nS === 1 ? "" : "s") + "</span>" : "",
+      '<span class="chip">' + (bearings() ? "Bearings" : "Angles") + ", " + { deg: "decimal degrees", dms: "DDD.MMSS", gon: "gons" }[S.fmt] + "</span>"].join("");
+    var pill = $("statusPill");
+    pill.className = "pill " + st;
+    pill.innerHTML = '<span class="dot"></span>' + esc({ pass: "Within tolerance", fail: "Outside tolerance", open: "Open: no check", err: "Not complete" }[st]);
+    pill.title = st === "err" ? R.error : "Open Close and adjust";
+    $("listSub").textContent = sh.adj ? "Showing the adjusted coordinates (" + METHOD[S.adjusted.method] + "). Edit anything to go back to the observed ones." : "Easting and Northing are worked out from the angles and distances.";
+    $("tfoot").innerHTML = st === "err" && S.rows.length ? '<svg class="i" style="color:var(--warn)"><use href="#i-alert"/></svg><span>' + esc(R.error) + "</span>" :
+      "<span>" + (bearings() ? "Bearing" : "Angle") + " and Distance give each new point. Type an Easting and Northing instead to work them out. A Side shot is taken from the set-up of the row above it.</span>";
+    foot();
     draw($("plan"), false);
     if (!$("step2").hidden) renderClose();
   }
-  /* a typed Easting or Northing: the angle and distance to it are worked back from the set-up */
+  function foot() {
+    var R = run();
+    $("footTx").textContent = (S.job || "Traverse") + " · " + TYPE[S.type] + " · " + METHOD[S.method] + (S.adjusted ? " · adjustment applied" : "") + (R.ok && R.res.closed ? " · precision " + ratioTx(R.res.closure.precision) : "");
+    document.title = (S.job ? S.job + " - " : "") + "Traverse Pro";
+  }
+  function select(i, scroll) {
+    SEL = i;
+    document.querySelectorAll("#body tr[data-row]").forEach(function (tr) { tr.classList.toggle("sel", +tr.dataset.row === i); });
+    if (scroll && i >= 0) { var tr = document.querySelector('#body tr[data-row="' + i + '"]'); if (tr) tr.scrollIntoView({ block: "nearest", behavior: "smooth" }); }
+    draw($("plan"), false);
+  }
+  /* a typed Easting and Northing: the angle and distance to it are worked back from the set-up */
   function onCoord(el) {
     var i = +el.dataset.i, tr = el.closest("tr");
     var E = tn(tr.querySelector('[data-k="east"]').value), N = tn(tr.querySelector('[data-k="north"]').value);
@@ -1096,6 +1365,7 @@ var SURV = (function () {
     if (from && from.bsAz === null) { toast("Set the backsight in Settings, its coordinates or a bearing to it: angles are turned from it."); return; }
     if (!from) { toast("Fill in the rows above first: this point is measured from " + (inf.station || "the row above") + "."); return; }
     var lg = legTo(from, E, N);
+    remember("");
     S.rows[i].angle = lg.angle; S.rows[i].distance = lg.distance;
     changed(true);
   }
@@ -1107,31 +1377,53 @@ var SURV = (function () {
   function nextName() {
     var used = {}, n = 1;
     S.rows.forEach(function (r) { used[String(r.name || "").trim()] = 1; });
-    used[String(S.station || "").trim()] = 1;
+    used[String(S.station || "").trim()] = 1; used[String(S.closePoint || "").trim()] = 1;
     while (used["P" + n]) n++;
     return "P" + n;
   }
-  function addRow() {
-    var at = insertIndex();
+  function addRow(at) {
+    remember("");
+    if (at === undefined) at = insertIndex();
     S.rows.splice(at, 0, { side: POINT, angle: "", distance: "", dh: "", name: nextName(), desc: "" });
     changed(true);
+    select(at, true);
     var el = document.querySelector('#body input[data-i="' + at + '"][data-k="angle"]');
     if (el) el.focus();
   }
 
   /* ---------- add a point by clicking the plan ---------- */
+  var adding = false;
+  function setAdding(on) {
+    adding = on;
+    var b = $("addBtn");
+    b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on));
+    b.querySelector("span").textContent = on ? "Click the plan · Esc to stop" : "Add point by click";
+    $("plan").classList.toggle("adding", on);
+    $("planHint").hidden = !on;
+    $("planHint").textContent = "Click to add a point. Esc or the button stops.";
+    draw($("plan"), false);
+  }
   function legTo(from, E, N) {
     var az = SURV.azimuth(from.E, from.N, E, N);
     return { angle: angleText(bearings() ? az : az - from.bsAz), distance: (SURV.dist2D(from.E, from.N, E, N) / scale()).toFixed(3), az: az };
   }
+  function clickFrom() {
+    var pv = provisional(), known = closed() && pv.L.tr.length >= 1 ? pv.L.tr.length - 1 : pv.L.tr.length;
+    return { pv: pv, known: known, from: pv.st[known] };
+  }
   function addByClick(E, N) {
-    var pv = provisional(), L = pv.L, st = pv.st;
+    var c = clickFrom(), st = c.pv.st;
     if (!st.length) { toast("Type the Start Easting and Start Northing first."); return; }
-    var known = closed() && L.tr.length >= 1 ? L.tr.length - 1 : L.tr.length;
-    if (st.length < known + 1) { toast("Finish the angle and distance of every row first: the new point hangs off the last one."); return; }
     if (st[0].bsAz === null) { toast("Set the backsight in Settings, its coordinates or a bearing to it: angles are turned from it."); return; }
-    var from = st[known], leg = legTo(from, E, N);
-    var row = { side: POINT, angle: leg.angle, distance: leg.distance, dh: "", name: nextName(), desc: "" };
+    if (!c.from) { toast("Finish the angle and distance of every row first: the new point hangs off the last one."); return; }
+    /* the closing leg runs from the new point afterwards: its values are re-measured on the plan */
+    var closing = null;
+    for (var ci0 = S.rows.length - 1; ci0 >= 0 && closed(); ci0--) if (S.rows[ci0].side !== SIDE) { closing = S.rows[ci0]; break; }
+    if (closing && !closing.drawn && (String(closing.angle).trim() || String(closing.distance).trim()) &&
+      !confirm("The closing leg to " + closeName() + " has observed values. The new point goes in before it, so the closing leg will run from the new point and its angle and distance will be measured on the plan instead.\n\nAdd the point? (Ctrl+Z undoes it.)")) return;
+    remember("");
+    var leg = legTo(c.from, E, N);
+    var row = { side: POINT, angle: leg.angle, distance: leg.distance, dh: "", name: nextName(), desc: "", drawn: true };
     var at = insertIndex();
     S.rows.splice(at, 0, row);
     if (closed()) {
@@ -1141,43 +1433,56 @@ var SURV = (function () {
         var after = { E: E, N: N, bsAz: SURV.n360(leg.az + 180) }, cl = legTo(after, end.E, end.N);
         var ci = -1;
         for (var i = S.rows.length - 1; i >= 0; i--) if (S.rows[i].side !== SIDE) { ci = i; break; }
-        if (ci === at) S.rows.push({ side: POINT, angle: cl.angle, distance: cl.distance, dh: "", name: closeName(), desc: "" });
-        else { S.rows[ci].angle = cl.angle; S.rows[ci].distance = cl.distance; }
+        if (ci === at) S.rows.push({ side: POINT, angle: cl.angle, distance: cl.distance, dh: "", name: closeName(), desc: "", drawn: true });
+        else { S.rows[ci].angle = cl.angle; S.rows[ci].distance = cl.distance; S.rows[ci].drawn = true; }
         var ea = endAz();
         if (!bearings() && S.closeMode !== "none" && ea !== null) S.closeAngle = angleText(ea - SURV.n360(cl.az + 180));
       }
     }
+    SEL = at;
     changed(true);
   }
 
-  /* ---------- the plan ---------- */
-  var VIEW = {};
+  /* ---------- the plan: fitted to the traverse, zoom with the wheel, drag to move ---------- */
+  var VIEW = {}, ZOOM = { z: 1, tx: 0, ty: 0 }, MARKS = [];
+  function resetView() { ZOOM = { z: 1, tx: 0, ty: 0 }; }
   function draw(c, final) {
     if (!c || c.offsetParent === null) return;
-    var dpr = window.devicePixelRatio || 1, w = c.clientWidth || 800, h = c.clientHeight || 360;
+    var dpr = window.devicePixelRatio || 1, w = c.clientWidth || 800, h = c.clientHeight || 400;
     if (c.width !== Math.round(w * dpr) || c.height !== Math.round(h * dpr)) { c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); }
     var g = c.getContext("2d");
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
     g.clearRect(0, 0, w, h);
+    /* a light grid */
+    g.strokeStyle = "#f1f3f6"; g.lineWidth = 1;
+    for (var gx0 = 0; gx0 < w; gx0 += 32) { g.beginPath(); g.moveTo(gx0 + .5, 0); g.lineTo(gx0 + .5, h); g.stroke(); }
+    for (var gy0 = 0; gy0 < h; gy0 += 32) { g.beginPath(); g.moveTo(0, gy0 + .5); g.lineTo(w, gy0 + .5); g.stroke(); }
     var R = run(), st, adj;
     if (final) { if (!R.ok) return; st = adjustedStations(R); adj = true; }
     else { var sh = shownStations(); st = sh.st; adj = sh.adj; }
     var L = layout(), sides = sideShots(L, st).filter(function (s) { return ok(s.E); });
     var bp = bsPt(), ep = S.type === "link" ? endPt() : null, fp = fsPt();
     var all = st.concat(sides).concat([bp, ep, fp].filter(Boolean));
-    if (!all.length) return;
+    if (!final) MARKS = [];
+    if (!all.length) {
+      g.fillStyle = "#98a2b1"; g.font = "13px Segoe UI"; g.textAlign = "center";
+      g.fillText("Type the Start Easting and Start Northing to begin the plan.", w / 2, h / 2); g.textAlign = "left";
+      return;
+    }
     var xs = all.map(function (q) { return q.E; }), ys = all.map(function (q) { return q.N; });
     var minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs), minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
     /* never closer than 100 m across, so a first click on an empty plan makes a sensible leg */
     var grow = function (lo, hi) { var m = (lo + hi) / 2, half = Math.max(hi - lo, 100) / 2; return [m - half, m + half]; };
     var gx = grow(minX, maxX), gy = grow(minY, maxY);
     minX = gx[0]; maxX = gx[1]; minY = gy[0]; maxY = gy[1];
-    var pad = 40, s = Math.min((w - 2 * pad) / (maxX - minX), (h - 2 * pad) / (maxY - minY));
+    var pad = 48, s = Math.min((w - 2 * pad) / (maxX - minX), (h - 2 * pad) / (maxY - minY));
     var ox = pad + (w - 2 * pad - (maxX - minX) * s) / 2, oy = pad + (h - 2 * pad - (maxY - minY) * s) / 2;
-    var X = function (e) { return ox + (e - minX) * s; }, Y = function (n) { return h - oy - (n - minY) * s; };
-    if (!final) VIEW = { minX: minX, minY: minY, s: s, ox: ox, oy: oy, h: h };
+    var Z = final ? { z: 1, tx: 0, ty: 0 } : ZOOM;
+    var X = function (e) { return (ox + (e - minX) * s) * Z.z + Z.tx; }, Y = function (n) { return (h - oy - (n - minY) * s) * Z.z + Z.ty; };
+    if (!final) VIEW = { minX: minX, minY: minY, s: s, ox: ox, oy: oy, h: h, X: X, Y: Y };
 
-    g.setLineDash([5, 4]); g.strokeStyle = "#9aa7b4"; g.lineWidth = 1;
+    g.lineCap = "round"; g.lineJoin = "round";
+    g.setLineDash([5, 5]); g.strokeStyle = "#a7b1be"; g.lineWidth = 1.2;
     if (bp && st[0]) { g.beginPath(); g.moveTo(X(st[0].E), Y(st[0].N)); g.lineTo(X(bp.E), Y(bp.N)); g.stroke(); }
     if (fp && ep) { g.beginPath(); g.moveTo(X(ep.E), Y(ep.N)); g.lineTo(X(fp.E), Y(fp.N)); g.stroke(); }
     g.strokeStyle = "#c6a15a";
@@ -1186,46 +1491,107 @@ var SURV = (function () {
       g.beginPath(); g.moveTo(X(from.E), Y(from.N)); g.lineTo(X(q.E), Y(q.N)); g.stroke();
     });
     g.setLineDash([]);
-    g.strokeStyle = adj ? "#1f6f3f" : "#1e2a38"; g.lineWidth = 2; g.beginPath();
+    /* the traverse, with a soft fill when it closes */
+    var col = adj ? "#1d7a4b" : "#1b2735";
+    if (S.type === "loop" && st.length > 3) {
+      g.fillStyle = adj ? "rgba(29,122,75,.06)" : "rgba(27,39,53,.045)"; g.beginPath();
+      st.forEach(function (q, i) { if (i) g.lineTo(X(q.E), Y(q.N)); else g.moveTo(X(q.E), Y(q.N)); });
+      g.closePath(); g.fill();
+    }
+    g.strokeStyle = col; g.lineWidth = 2.2; g.beginPath();
     st.forEach(function (q, i) { if (i) g.lineTo(X(q.E), Y(q.N)); else g.moveTo(X(q.E), Y(q.N)); });
     g.stroke();
+    /* the selected row's leg */
+    if (!final && SEL >= 0 && L.info[SEL]) {
+      var inf = L.info[SEL], a = st[inf.k], b = inf.kind === "t" ? st[inf.k + 1] : sides.filter(function (x) { return x.i === SEL; })[0];
+      if (a && b) { g.strokeStyle = "#c6a15a"; g.lineWidth = 5; g.globalAlpha = .55; g.beginPath(); g.moveTo(X(a.E), Y(a.N)); g.lineTo(X(b.E), Y(b.N)); g.stroke(); g.globalAlpha = 1; }
+    }
     if (!adj && closed() && st.length === L.names.length) {
       var e2 = endPt(), last = st[st.length - 1];
       if (e2 && (Math.abs(last.E - e2.E) > 1e-6 || Math.abs(last.N - e2.N) > 1e-6)) {
-        g.strokeStyle = "#c0392b"; g.lineWidth = 1.5; g.beginPath(); g.moveTo(X(last.E), Y(last.N)); g.lineTo(X(e2.E), Y(e2.N)); g.stroke();
+        g.strokeStyle = "#b42318"; g.lineWidth = 2; g.beginPath(); g.moveTo(X(last.E), Y(last.N)); g.lineTo(X(e2.E), Y(e2.N)); g.stroke();
       }
     }
-    g.font = "12px Segoe UI";
-    var label = function (q, tx, col) { g.fillStyle = col; g.fillText(tx, X(q.E) + 6, Y(q.N) - 6); };
-    var tri = function (q, col) {
-      g.fillStyle = col; g.beginPath(); g.moveTo(X(q.E), Y(q.N) - 7); g.lineTo(X(q.E) + 6, Y(q.N) + 5); g.lineTo(X(q.E) - 6, Y(q.N) + 5); g.closePath(); g.fill();
+    g.font = "600 12px Segoe UI";
+    var label = function (q, tx, colr) {
+      var x = X(q.E) + 8, y = Y(q.N) - 8;
+      g.lineWidth = 3; g.strokeStyle = "rgba(255,255,255,.9)"; g.strokeText(tx, x, y);
+      g.fillStyle = colr; g.fillText(tx, x, y);
     };
-    [bp, fp].forEach(function (q) { if (q) { tri(q, "#6b7785"); label(q, q.name || "BS", "#6b7785"); } });
-    if (ep) { tri(ep, "#c6a15a"); label(ep, ep.name, "#1e2a38"); }
-    sides.forEach(function (q) { g.fillStyle = "#b07d22"; g.beginPath(); g.arc(X(q.E), Y(q.N), 2.6, 0, 6.283); g.fill(); label(q, q.name, "#8a6418"); });
-    st.forEach(function (q, i) {
-      g.fillStyle = adj ? "#1f6f3f" : "#1e2a38"; g.beginPath(); g.arc(X(q.E), Y(q.N), 3, 0, 6.283); g.fill();
-      if (!(S.type === "loop" && i === st.length - 1 && st.length > 1)) label(q, q.name || "?", "#1e2a38");
+    var tri = function (q, colr) {
+      g.fillStyle = colr; g.strokeStyle = "#fff"; g.lineWidth = 1.5; g.beginPath(); g.moveTo(X(q.E), Y(q.N) - 8); g.lineTo(X(q.E) + 7, Y(q.N) + 5); g.lineTo(X(q.E) - 7, Y(q.N) + 5); g.closePath(); g.fill(); g.stroke();
+    };
+    var mark = function (q, kind, row) { if (!final) MARKS.push({ x: X(q.E), y: Y(q.N), p: q, kind: kind, row: row }); };
+    [bp, fp].forEach(function (q) { if (q) { tri(q, "#7b8796"); label(q, q.name || "BS", "#5d6877"); mark(q, q === bp ? "Backsight" : "Foresight", -1); } });
+    if (ep) { tri(ep, "#c6a15a"); label(ep, ep.name, "#1b2735"); mark(ep, "Close point", -1); }
+    sides.forEach(function (q) {
+      g.fillStyle = "#b07d22"; g.beginPath(); g.arc(X(q.E), Y(q.N), 3, 0, 6.283); g.fill();
+      g.font = "12px Segoe UI"; label(q, q.name, "#8a6418"); g.font = "600 12px Segoe UI"; mark(q, "Side shot", q.i);
     });
+    var rowOf = {};
+    L.info.forEach(function (x, i) { if (x.kind === "t") rowOf[x.k + 1] = i; });
+    st.forEach(function (q, i) {
+      if (S.type === "loop" && i === st.length - 1 && st.length > 1 && st.length === L.names.length) return;
+      if (i === 0) tri(q, "#c6a15a");
+      else { g.fillStyle = "#fff"; g.strokeStyle = col; g.lineWidth = 2; g.beginPath(); g.arc(X(q.E), Y(q.N), 4, 0, 6.283); g.fill(); g.stroke(); }
+      label(q, q.name || "?", "#1b2735");
+      mark(q, i === 0 ? "Start station" : "Station", i === 0 ? -1 : rowOf[i]);
+    });
+    /* north arrow and a scale bar */
+    g.fillStyle = "#1b2735"; g.strokeStyle = "#1b2735";
+    g.beginPath(); g.moveTo(w - 26, 14); g.lineTo(w - 33, 34); g.lineTo(w - 26, 29); g.lineTo(w - 19, 34); g.closePath(); g.fill();
+    g.font = "bold 11px Segoe UI"; g.textAlign = "center"; g.fillText("N", w - 26, 48);
+    var sz = s * Z.z, target = 110 / sz, pow = Math.pow(10, Math.floor(Math.log10(target)));
+    var step = [1, 2, 5, 10].map(function (k) { return k * pow; }).filter(function (k) { return k <= target; }).pop() || pow, bw = step * sz;
+    g.lineWidth = 2; g.beginPath(); g.moveTo(w - 20 - bw, h - 16); g.lineTo(w - 20, h - 16); g.moveTo(w - 20 - bw, h - 20); g.lineTo(w - 20 - bw, h - 12); g.moveTo(w - 20, h - 20); g.lineTo(w - 20, h - 12); g.stroke();
+    g.font = "11px Segoe UI"; g.fillText((step >= 1 ? step : +step.toPrecision(1)) + " m", w - 20 - bw / 2, h - 23);
+    g.textAlign = "left";
+    /* the line the next click would add */
+    if (!final && adding && HOVER) {
+      var c0 = clickFrom();
+      if (c0.from && c0.from.bsAz !== null) {
+        var lg = legTo(c0.from, HOVER.E, HOVER.N);
+        g.setLineDash([6, 5]); g.strokeStyle = "#c6a15a"; g.lineWidth = 2;
+        g.beginPath(); g.moveTo(X(c0.from.E), Y(c0.from.N)); g.lineTo(X(HOVER.E), Y(HOVER.N)); g.stroke(); g.setLineDash([]);
+        label({ E: HOVER.E, N: HOVER.N }, lg.angle + "  ·  " + lg.distance + " m", "#8a6418");
+      }
+    }
   }
-  function planPoint(ev) {
-    var c = $("plan"), r = c.getBoundingClientRect(), x = ev.clientX - r.left, y = ev.clientY - r.top;
+  var HOVER = null;
+  function planXY(ev) { var r = $("plan").getBoundingClientRect(); return { x: ev.clientX - r.left, y: ev.clientY - r.top }; }
+  function toWorld(x, y) {
     if (!VIEW.s) return null;
-    return { E: VIEW.minX + (x - VIEW.ox) / VIEW.s, N: VIEW.minY + (VIEW.h - VIEW.oy - y) / VIEW.s };
+    var sx = (x - ZOOM.tx) / ZOOM.z, sy = (y - ZOOM.ty) / ZOOM.z;
+    return { E: VIEW.minX + (sx - VIEW.ox) / VIEW.s, N: VIEW.minY + (VIEW.h - VIEW.oy - sy) / VIEW.s };
+  }
+  function nearest(x, y) {
+    var best = null, bd = 12;
+    MARKS.forEach(function (m) { var d = Math.hypot(m.x - x, m.y - y); if (d < bd) { bd = d; best = m; } });
+    return best;
+  }
+  function showTip(m, x, y) {
+    var t = $("tip");
+    if (!m) { t.hidden = true; return; }
+    t.innerHTML = "<b>" + esc(m.p.name || "?") + "</b> · " + esc(m.kind) + "<br>E " + f(m.p.E, 3) + "  N " + f(m.p.N, 3) + (ok(m.p.H) ? "<br>Level " + f(m.p.H, 3) : "");
+    t.hidden = false;
+    var bw = $("plan").clientWidth;
+    t.style.left = Math.min(x + 14, bw - t.offsetWidth - 6) + "px"; t.style.top = (y + 14) + "px";
   }
 
   /* ---------- step 2: close and adjust ---------- */
   function badge(q) { return q === null ? '<span class="badge na">No check</span>' : q ? '<span class="badge pass">Pass</span>' : '<span class="badge fail">Fail</span>'; }
+  function tile(k, v, s, st) { return '<div class="tile ' + (st || "") + '"><div class="k">' + esc(k) + '</div><div class="v">' + v + '</div><div class="s">' + (s || "&nbsp;") + "</div></div>"; }
   function renderClose() {
     renderSetup();
-    $("station2").value = S.station;
-    $("backsight2").value = bsLabel();
-    $("closePoint2").value = closeName();
+    $("ctx").innerHTML = '<span class="chip">' + esc(S.station || "?") + " → " + esc(closed() ? closeName() : "open") + '</span><span class="chip">Backsight ' + esc(bsLabel()) + '</span><span class="chip">' + TYPE[S.type] + "</span>";
     var R = run();
-    $("closeOut").style.display = R.ok ? "" : "none";
-    $("more").style.display = R.ok ? "" : "none";
-    $("applyBtn").disabled = !R.ok;
-    if (!R.ok) { $("checkLine").innerHTML = '<span class="err"><b>Not ready to close.</b> ' + esc(R.error) + "</span>"; return; }
+    $("adjCard").hidden = !R.ok; $("more").hidden = !R.ok; $("tiles").hidden = !R.ok;
+    if (!R.ok) {
+      $("banner").innerHTML = '<div class="errbox"><svg class="i"><use href="#i-alert"/></svg><div><b>Not ready to close.</b> ' + esc(R.error) +
+        ' <a href="#" id="toList">Back to the list</a></div></div>';
+      $("toList").onclick = function (e) { e.preventDefault(); show(1); };
+      return;
+    }
     var r = R.res, c = r.closure, n = r.names.length, Ef = r.finalE, Nf = r.finalN, H = r.H, q = r.lsq;
     var area = null;
     if (S.type === "loop" && n >= 4) {
@@ -1234,21 +1600,33 @@ var SURV = (function () {
       area = Math.abs(a) / 2;
     }
     var errDir = r.closed && c.fL > 0 ? SURV.azimuth(0, 0, c.fE, c.fN) : null;
-    $("summary").innerHTML = "<tr><td>" + esc(S.station + " to " + (closed() ? closeName() : r.names[n - 1])) + "</td><td>" + (r.closed ? ratioTx(c.precision) : "—") +
-      "</td><td>" + (r.closed ? f(c.fL, 4) : "—") + "</td><td>" + brgTx(errDir) + "</td><td>" + (area !== null ? f(area, 3) : "—") + "</td><td>" + f(c.sumD, 3) + "</td></tr>";
+    var stt = status(R), why = [];
+    if (c.angPass === false) why.push("angular misclosure " + SURV.fmtSec(c.angMis, 1) + " is over ±" + c.angAllow.toFixed(1) + '"');
+    if (c.precPass === false) why.push("precision " + ratioTx(c.precision) + " is under 1:" + fc(c.ratioReq, 0));
+    if (c.hPass === false) why.push("level misclosure " + mm(c.fH) + " is over ±" + mm(c.hAllow));
+    if (q && q.chi && !q.chi.pass) why.push("the least squares test fails: the observations disagree " + (q.chi.value > q.chi.hi ? "more" : "less") + " than their σ in Settings allow");
+    $("banner").innerHTML = '<div class="banner ' + stt + '"><svg class="i"><use href="#i-' + (stt === "pass" ? "check" : stt === "fail" ? "x" : "alert") + '"/></svg><div>' +
+      { pass: "Within tolerance", fail: "Outside tolerance", open: "Open traverse: nothing to check it against" }[stt] +
+      (why.length ? ' <span class="why">· ' + esc(why.join("; ")) + "</span>" : stt === "pass" ? ' <span class="why">· ' + esc(S.cls === "custom" ? "custom tolerance" : S.cls + " class") + "</span>" : "") + "</div></div>";
 
-    $("adjHead").innerHTML = "<tr><th>Station</th><th>To</th><th>Easting</th><th>Northing</th>" + (H ? "<th>Level</th>" : "") + "<th>Bearing</th><th>Distance</th><th>ΔX</th><th>ΔY</th></tr>";
+    var t = [];
+    t.push(tile("Precision", r.closed ? ratioTx(c.precision) : "—", r.closed ? "needs 1:" + fc(c.ratioReq, 0) : "open traverse", c.precPass === null ? "" : c.precPass ? "pass" : "fail"));
+    t.push(tile("Error distance", r.closed ? f(c.fL, 4) + " m" : "—", r.closed ? "ΔE " + f(c.fE, 4) + "  ΔN " + f(c.fN, 4) : ""));
+    t.push(tile("Error direction", brgTx(errDir), ""));
+    t.push(tile("Angular misclosure", c.hasClose ? SURV.fmtSec(c.angMis, 1) : "—", c.hasClose ? "allowed ±" + c.angAllow.toFixed(1) + '"' : bearings() ? "bearings: not checked" : "no closing angle", c.angPass === null ? "" : c.angPass ? "pass" : "fail"));
+    if (S.useH) t.push(tile("Level misclosure", c.fH !== null ? mm(c.fH) : "—", c.hAllow !== null ? "allowed ±" + mm(c.hAllow) : "", c.hPass === null ? "" : c.hPass ? "pass" : "fail"));
+    t.push(tile("Area", area !== null ? fc(area, 3) + " m²" : "—", area !== null ? f(area / 10000, 4) + " ha" : "closed loops only"));
+    t.push(tile("Perimeter", fc(c.sumD, 3) + " m", n - 1 + " legs"));
+    $("tiles").innerHTML = t.join("");
+
+    $("adjSub").textContent = METHOD[S.method] + (S.adjusted ? " · applied" : "");
+    $("adjHead").innerHTML = "<tr><th>Station</th><th>To</th><th class=r>Easting</th><th class=r>Northing</th>" + (H ? "<th class=r>Level</th>" : "") + "<th class=r>Bearing</th><th class=r>Distance</th><th class=r>ΔX</th><th class=r>ΔY</th></tr>";
     $("adj").innerHTML = r.adjLegs.map(function (lg, k) {
       var dE = Ef[k + 1] - Ef[k], dN = Nf[k + 1] - Nf[k];
-      return "<tr><td>" + esc(lg.from) + "</td><td>" + esc(lg.to) + "</td><td>" + f(Ef[k + 1], 3) + "</td><td>" + f(Nf[k + 1], 3) + "</td>" +
-        (H ? "<td>" + f(H[k + 1], 3) + "</td>" : "") + "<td>" + brgTx(lg.az) + "</td><td>" + f(lg.d, 3) + "</td><td>" + f(dE - r.dE[k], 4) + "</td><td>" + f(dN - r.dN[k], 4) + "</td></tr>";
+      return "<tr><td>" + esc(lg.from) + "</td><td>" + esc(lg.to) + "</td><td class=r>" + f(Ef[k + 1], 3) + "</td><td class=r>" + f(Nf[k + 1], 3) + "</td>" +
+        (H ? "<td class=r>" + f(H[k + 1], 3) + "</td>" : "") + "<td class=r>" + brgTx(lg.az) + "</td><td class=r>" + f(lg.d, 3) + "</td><td class=r>" + f(dE - r.dE[k], 4) + "</td><td class=r>" + f(dN - r.dN[k], 4) + "</td></tr>";
     }).join("");
-
-    var stt = status(R);
-    $("checkLine").innerHTML = (stt === "pass" ? '<span class="badge pass">Within tolerance</span>' : stt === "fail" ? '<span class="badge fail">Outside tolerance</span>' : '<span class="badge na">Open traverse: no check</span>') +
-      (r.closed ? "<span>Precision " + ratioTx(c.precision) + " (needs 1:" + fc(c.ratioReq, 0) + ")</span>" : "") +
-      (c.hasClose ? "<span>Angular misclosure " + SURV.fmtSec(c.angMis, 1) + " (allowed ±" + c.angAllow.toFixed(1) + '")</span>' : "") +
-      (c.fH !== null ? "<span>Level misclosure " + mm(c.fH) + " (allowed ±" + mm(c.hAllow) + ")</span>" : "");
+    $("applyBtn").disabled = false;
 
     var ch = [];
     ch.push(["Angular misclosure (" + c.nAng + " angles)", c.hasClose ? SURV.fmtSec(c.angMis, 1) + " (" + SURV.fmtSec(c.angCorr, 2) + " each)" : bearings() ? "not checked: the list holds bearings" : r.closed ? "no closing orientation" : "open traverse", c.hasClose ? "±" + c.angAllow.toFixed(1) + '"' : "—", badge(c.angPass)]);
@@ -1257,31 +1635,32 @@ var SURV = (function () {
     if (q && q.chi) ch.push(["Chi-square test (95%)", q.chi.value.toFixed(2), q.chi.lo.toFixed(2) + " to " + q.chi.hi.toFixed(2), badge(q.chi.pass)]);
     $("checks").innerHTML = ch.map(function (x) { return "<tr><td>" + x[0] + "</td><td>" + esc(x[1]) + "</td><td>" + esc(x[2]) + "</td><td>" + x[3] + "</td></tr>"; }).join("");
 
-    $("lsqBox").innerHTML = q ? "<h2>Least squares</h2><table><thead><tr><th>Observations</th><th>Unknowns</th><th>Redundancy</th><th>Iterations</th><th>Std. error of unit weight</th></tr></thead><tbody><tr><td>" +
+    $("lsqBox").innerHTML = q ? '<h3>Least squares</h3><table class="rt"><thead><tr><th>Observations</th><th>Unknowns</th><th>Redundancy</th><th>Iterations</th><th>Std. error of unit weight</th></tr></thead><tbody><tr><td>' +
       q.m + "</td><td>" + q.u + "</td><td>" + q.r + "</td><td>" + q.iter + "</td><td>" + q.s0.toFixed(3) + "</td></tr></tbody></table>" +
-      '<h2>Observations and residuals</h2><div class="table-wrap"><table><thead><tr><th>Observation</th><th>At</th><th>To</th><th>Observed</th><th>Adjusted</th><th>Residual</th><th>Standardised</th></tr></thead><tbody>' +
+      '<h3>Observations and residuals</h3><div class="table-wrap"><table class="rt"><thead><tr><th>Observation</th><th>At</th><th>To</th><th class=r>Observed</th><th class=r>Adjusted</th><th class=r>Residual</th><th class=r>Standardised</th></tr></thead><tbody>' +
       q.obs.map(function (o) {
         var isD = o.unit === "m";
-        return "<tr><td>" + esc(o.label) + "</td><td>" + esc(o.at) + "</td><td>" + esc(o.to) + "</td><td>" + (isD ? f(o.obs, 4) : SURV.fmtDMS(o.obs, 1)) + "</td><td>" + (isD ? f(o.adj, 4) : SURV.fmtDMS(o.adj, 1)) +
-          "</td><td>" + (isD ? mm(o.v) : SURV.fmtSec(o.v, 2)) + '</td><td class="' + (o.flag ? "err" : "") + '">' + (o.std === null ? "—" : o.std.toFixed(2) + (o.flag ? " check" : "")) + "</td></tr>";
+        return "<tr><td>" + esc(o.label) + "</td><td>" + esc(o.at) + "</td><td>" + esc(o.to) + "</td><td class=r>" + (isD ? f(o.obs, 4) : SURV.fmtDMS(o.obs, 1)) + "</td><td class=r>" + (isD ? f(o.adj, 4) : SURV.fmtDMS(o.adj, 1)) +
+          "</td><td class=r>" + (isD ? mm(o.v) : SURV.fmtSec(o.v, 2)) + '</td><td class="r' + (o.flag ? " flag" : "") + '">' + (o.std === null ? "—" : o.std.toFixed(2) + (o.flag ? " check" : "")) + "</td></tr>";
       }).join("") + "</tbody></table></div>" +
-      '<h2>Station precision</h2><table><thead><tr><th>Station</th><th>σE</th><th>σN</th><th>95% ellipse</th></tr></thead><tbody>' +
+      '<h3>Station precision</h3><table class="rt"><thead><tr><th>Station</th><th class=r>σE</th><th class=r>σN</th><th class=r>95% error ellipse</th></tr></thead><tbody>' +
       r.stations.filter(function (s) { return ok(s.sE); }).map(function (s) {
-        return "<tr><td>" + esc(s.name) + "</td><td>" + mm(s.sE) + "</td><td>" + mm(s.sN) + "</td><td>" + mm(s.ellA) + " × " + mm(s.ellB) + " @ " + s.ellAz.toFixed(0) + "°</td></tr>";
+        return "<tr><td>" + esc(s.name) + "</td><td class=r>" + mm(s.sE) + "</td><td class=r>" + mm(s.sN) + "</td><td class=r>" + mm(s.ellA) + " × " + mm(s.ellB) + " @ " + s.ellAz.toFixed(0) + "°</td></tr>";
       }).join("") + "</tbody></table>" : "";
 
+    $("angBox").hidden = bearings();
     $("angles").innerHTML = r.rows.map(function (x, k) {
       if (x.obs === null) return "";
       var bsN = k === 0 ? bsLabel() : r.names[k - 1], fsN = k < n - 1 ? r.names[k + 1] : (S.closeMode === "bearing" ? "Brg " + S.fsBrg : S.type === "loop" ? bsLabel() : S.fsName);
       var corr = SURV.n180(r.adjAng[k] - x.obs) * 3600;
-      return "<tr><td>" + esc(x.name) + (k === n - 1 ? " (closing)" : "") + "</td><td>" + esc(bsN) + "</td><td>" + esc(fsN) + "</td><td>" + SURV.fmtDMS(x.obs, 1) + "</td><td>" + SURV.fmtSec(corr, 2) + "</td><td>" + SURV.fmtDMS(r.adjAng[k], 1) + "</td></tr>";
+      return "<tr><td>" + esc(x.name) + (k === n - 1 ? " (closing)" : "") + "</td><td>" + esc(bsN) + "</td><td>" + esc(fsN) + "</td><td class=r>" + SURV.fmtDMS(x.obs, 1) + "</td><td class=r>" + SURV.fmtSec(corr, 2) + "</td><td class=r>" + SURV.fmtDMS(r.adjAng[k], 1) + "</td></tr>";
     }).join("");
 
     var sides = sideShots(layout(), adjustedStations(R));
-    $("sideBox").innerHTML = sides.length ? '<h2>Side shots, from the adjusted stations</h2><table><thead><tr><th>Name</th><th>From</th><th>Bearing</th><th>Distance</th><th>Easting</th><th>Northing</th>' +
-      (S.useH ? "<th>Level</th>" : "") + "<th>Description</th></tr></thead><tbody>" + sides.map(function (s) {
-        return "<tr><td>" + esc(s.name) + "</td><td>" + esc(s.from) + "</td><td>" + brgTx(s.az) + "</td><td>" + (ok(s.d) ? f(s.d * scale(), 3) : "—") +
-          "</td><td>" + (ok(s.E) ? f(s.E, 3) : "—") + "</td><td>" + (ok(s.N) ? f(s.N, 3) : "—") + "</td>" + (S.useH ? "<td>" + (ok(s.H) ? f(s.H, 3) : "—") + "</td>" : "") + "<td>" + esc(s.desc) + "</td></tr>";
+    $("sideBox").innerHTML = sides.length ? '<h3>Side shots, from the adjusted stations</h3><table class="rt"><thead><tr><th>Name</th><th>From</th><th class=r>Bearing</th><th class=r>Distance</th><th class=r>Easting</th><th class=r>Northing</th>' +
+      (S.useH ? "<th class=r>Level</th>" : "") + "<th>Description</th></tr></thead><tbody>" + sides.map(function (s) {
+        return "<tr><td>" + esc(s.name) + "</td><td>" + esc(s.from) + "</td><td class=r>" + brgTx(s.az) + "</td><td class=r>" + (ok(s.d) ? f(s.d * scale(), 3) : "—") +
+          "</td><td class=r>" + (ok(s.E) ? f(s.E, 3) : "—") + "</td><td class=r>" + (ok(s.N) ? f(s.N, 3) : "—") + "</td>" + (S.useH ? "<td class=r>" + (ok(s.H) ? f(s.H, 3) : "—") + "</td>" : "") + "<td>" + esc(s.desc) + "</td></tr>";
       }).join("") + "</tbody></table>" : "";
     $("warnBox").innerHTML = r.warnings.map(function (w) { return "<li>" + esc(w) + "</li>"; }).join("");
     if ($("more").open) draw($("plan2"), true);
@@ -1290,10 +1669,11 @@ var SURV = (function () {
     var R = run();
     if (!R.ok) return;
     if (status(R) === "fail" && !confirm("This traverse is outside tolerance. Apply the adjustment anyway?")) return;
+    remember("");
     S.adjusted = { method: S.method, at: new Date().toISOString() };
     save();
     renderAll();
-    $("msg").textContent = "Closed. Adjusted Easting and Northing are written back to the list.";
+    toast("Closed by " + METHOD[S.method] + ". The adjusted Easting and Northing are shown in the list. Your observations are unchanged.");
   }
 
   /* ---------- files ---------- */
@@ -1368,6 +1748,7 @@ var SURV = (function () {
     } else cols = DEFAULT_COLS;
     var get = function (r, k) { var j = cols.indexOf(k); return j >= 0 && r[j] !== undefined ? r[j] : ""; };
     if (!table.length) throw new Error("The file has a heading but no rows.");
+    remember("");
     var st0 = get(table[0], "station"), bs0 = get(table[0], "backsight");
     if (st0) S.station = st0;
     if (bs0) S.backsight = bs0;
@@ -1389,6 +1770,7 @@ var SURV = (function () {
     S.closePoint = last && String(last.name || "").trim() === String(S.station || "").trim() ? S.station : "";
     syncType();
     S.job = String(fileName || "").replace(/\.[^.]+$/, "") || S.job;
+    SEL = -1; resetView();
     changed(true);
     toast("Loaded " + S.rows.length + " row" + (S.rows.length === 1 ? "" : "s") + " from " + fileName + "." + (derived ? " " + derived + " worked out from coordinates." : ""));
   }
@@ -1400,6 +1782,7 @@ var SURV = (function () {
         if (/\.json$/i.test(file.name)) {
           var j = JSON.parse(text);
           if (!j || !Array.isArray(j.rows)) throw new Error("This is not a Traverse Pro job.");
+          remember(""); SEL = -1; resetView();
           if (j.v === 2) { S = Object.assign(defaults(), j); delete S.app; }
           else if (j.v === 1) { S = Object.assign(defaults(), j, { v: 2, angleMode: "angle", closePoint: j.type === "loop" ? j.station : j.type === "open" ? "" : j.closePoint }); delete S.app; }
           else {
@@ -1415,6 +1798,7 @@ var SURV = (function () {
     rd.readAsText(file);
   }
 
+
   /* ---------- the report ---------- */
   function reportHtml() {
     var R = run();
@@ -1428,21 +1812,24 @@ var SURV = (function () {
     var setup = [["Kind", TYPE[S.type]], ["Adjustment", METHOD[S.method]], ["Start", S.station + "  E " + S.startE + "  N " + S.startN + (S.useH && S.startH ? "  Level " + S.startH : "")],
       ["Backsight", bsLabel() + (!bearings() ? (S.bsMode === "point" ? "  E " + S.bsE + "  N " + S.bsN : "  bearing " + S.bsBrg) : "")],
       ["Close point", closed() ? closeName() + (S.type === "link" ? "  E " + S.closeE + "  N " + S.closeN : "") : "none: open traverse"],
-      ["Angle column", bearings() ? "Bearings" : "Angles turned " + (S.angleDir === "cw" ? "clockwise" : "anticlockwise") + " from the backsight"],
+      ["Angle column", bearings() ? "Bearings" : "Angles turned " + (S.angleDir === "cw" ? "clockwise" : "anticlockwise") + " from the backsight" + (closed() && S.closeMode !== "none" ? ", closing angle " + S.closeAngle : "")],
       ["Typed as", { dms: "DDD.MMSS", deg: "Decimal degrees", gon: "Gons" }[S.fmt]], ["Scale factor", S.scale],
-      ["Tolerance", (bearings() ? "" : S.tol.angK + '" × √n, ') + "1:" + S.tol.ratio + (S.useH ? ", levels " + S.tol.hC + " mm × √km" : "")]];
+      ["Tolerance", (S.cls === "custom" ? "Custom" : S.cls.charAt(0).toUpperCase() + S.cls.slice(1)) + ": " + (bearings() ? "" : S.tol.angK + '" × √n, ') + "1:" + S.tol.ratio + (S.useH ? ", levels " + S.tol.hC + " mm × √km" : "")]];
     var L = layout();
-    var obs = "<table><thead><tr><th>#</th><th>Side</th><th>Station</th><th>Backsight</th><th>Angle</th><th>Distance</th>" + (S.useH ? "<th>Ht diff</th>" : "") + "<th>Name</th><th>Description</th></tr></thead><tbody>" +
+    var obs = "<table><thead><tr><th>#</th><th>Side</th><th>Station</th><th>Backsight</th><th>" + (bearings() ? "Bearing" : "Angle") + "</th><th>Distance</th>" + (S.useH ? "<th>Ht diff</th>" : "") + "<th>Name</th><th>Description</th></tr></thead><tbody>" +
       S.rows.map(function (r, i) { var inf = L.info[i]; return "<tr><td>" + (i + 1) + "</td><td>" + esc(r.side) + "</td><td>" + esc(inf.station) + "</td><td>" + esc(inf.bs) + "</td><td>" + esc(r.angle) + "</td><td>" + esc(r.distance) + "</td>" + (S.useH ? "<td>" + esc(r.dh) + "</td>" : "") + "<td>" + esc(inf.to) + "</td><td>" + esc(r.desc) + "</td></tr>"; }).join("") + "</tbody></table>";
-    var body = R.ok ? "<h2>Closure</h2>" + tbl("summary") + "<h2>Checks</h2>" + tbl("checks") + "<h2>Adjusted values</h2>" + tbl("adj") + $("lsqBox").innerHTML +
-      (bearings() ? "" : "<h2>Angles</h2>" + tbl("angles")) + $("sideBox").innerHTML + ($("warnBox").innerHTML ? "<h2>Notes</h2><ul>" + $("warnBox").innerHTML + "</ul>" : "") + "<h2>Plan</h2>" + plan
+    var body = R.ok ? '<div class="res">' + $("banner").textContent + "</div><h2>Closure</h2>" + '<div class="tiles">' + $("tiles").innerHTML + "</div><h2>Checks</h2>" + tbl("checks") + "<h2>Adjusted values</h2>" + tbl("adj") + $("lsqBox").innerHTML.replace(/<h3>/g, "<h2>").replace(/<\/h3>/g, "</h2>") +
+      (bearings() ? "" : "<h2>Angles</h2>" + tbl("angles")) + $("sideBox").innerHTML.replace(/<h3>/g, "<h2>").replace(/<\/h3>/g, "</h2>") + ($("warnBox").innerHTML ? "<h2>Notes</h2><ul>" + $("warnBox").innerHTML + "</ul>" : "") + "<h2>Plan</h2>" + plan
       : '<p class="err">Not adjusted: ' + esc(R.error) + "</p>";
     return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>' + esc(S.job) + ' - traverse report</title><style>' +
-      'body{font:12px "Segoe UI",Arial,sans-serif;color:#222;margin:24px}h1{font-size:18px;margin:0;color:#1e2a38}h2{font-size:13px;margin:18px 0 6px;color:#1e2a38;border-bottom:2px solid #c6a15a;padding-bottom:2px}' +
-      '.sub{color:#666;margin:4px 0 12px}table{border-collapse:collapse;width:100%;margin:4px 0}th,td{border:1px solid #ccc;padding:3px 5px;text-align:center;white-space:nowrap}th{background:#f1f1f1}' +
-      '.badge{font-weight:700}.badge.pass{color:#14532d}.badge.fail{color:#8a1c10}.err{color:#8a1c10}' +
-      '.kv td:first-child{text-align:left;width:160px;background:#fafafa}.kv td{text-align:left}img.plan{width:100%;border:1px solid #ccc}.foot{margin-top:18px;color:#888;font-size:11px}' +
-      '@media print{body{margin:10mm}h2{break-after:avoid}tr{break-inside:avoid}}</style></head><body>' +
+      'body{font:12px "Segoe UI",Arial,sans-serif;color:#1c2430;margin:28px}h1{font-size:19px;margin:0;color:#1b2735}h2{font-size:13px;margin:20px 0 6px;color:#1b2735;border-bottom:2px solid #c6a15a;padding-bottom:3px}' +
+      '.sub{color:#6a7586;margin:4px 0 12px}table{border-collapse:collapse;width:100%;margin:4px 0}th,td{border:1px solid #d9dde3;padding:4px 6px;text-align:center;white-space:nowrap}th{background:#f3f4f6}' +
+      '.badge{font-weight:700}.badge.pass{color:#1d7a4b}.badge.fail{color:#b42318}.err,.flag{color:#b42318}.r{text-align:right}' +
+      '.res{margin:14px 0 0;padding:8px 10px;border-radius:6px;background:#f3f4f6;font-weight:600}' +
+      '.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.tile{border:1px solid #d9dde3;border-radius:6px;padding:6px 8px}.tile .k{color:#6a7586;font-size:11px}.tile .v{font-size:15px;font-weight:700}.tile .s{color:#6a7586;font-size:11px}' +
+      '.tile.pass{border-left:3px solid #1d7a4b}.tile.fail{border-left:3px solid #b42318}' +
+      '.kv td:first-child{text-align:left;width:160px;background:#f8f9fb}.kv td{text-align:left}img.plan{width:100%;border:1px solid #d9dde3;border-radius:6px}.foot{margin-top:18px;color:#98a2b1;font-size:11px}' +
+      '@media print{body{margin:10mm}h2{break-after:avoid}tr,.tile{break-inside:avoid}}</style></head><body>' +
       "<h1>Traverse adjustment: " + esc(S.job) + '</h1><div class="sub">' + esc(TYPE[S.type] + " · " + METHOD[S.method] + " · " + new Date().toLocaleString()) + "</div>" +
       '<h2>Set-up</h2><table class="kv"><tbody>' + setup.map(function (x) { return "<tr><td>" + esc(x[0]) + "</td><td>" + esc(x[1]) + "</td></tr>"; }).join("") + "</tbody></table>" +
       "<h2>Field book</h2>" + obs + body +
@@ -1472,9 +1859,11 @@ var SURV = (function () {
     $("step2").hidden = step !== 2;
     $("tab1").classList.toggle("on", step === 1);
     $("tab2").classList.toggle("on", step === 2);
-    if (step === 2) renderClose(); else { $("msg").textContent = ""; draw($("plan"), false); }
+    if (step === 2) { setAdding(false); renderClose(); } else draw($("plan"), false);
   }
   function renderAll() { renderSetup(); renderTable(); }
+  function openSettings() { renderSetup(); $("setOverlay").hidden = false; var el = $("setOverlay").querySelector("select, input"); if (el) el.focus(); }
+  function closeSettings() { $("setOverlay").hidden = true; }
 
   /* ---------- wiring ---------- */
   document.querySelectorAll("[data-s]").forEach(function (el) {
@@ -1483,57 +1872,123 @@ var SURV = (function () {
   $("body").addEventListener("input", function (e) {
     var el = e.target, k = el.dataset.k;
     if (!el.matches("input[data-k]") || el.readOnly) return;
-    var i = +el.dataset.i;
     if (k === "east" || k === "north") return;
-    if (k === "station") { if (String(S.closePoint).trim() === String(S.station).trim()) S.closePoint = el.value; S.station = el.value; syncType(); $("station").value = el.value; $("closePoint").value = S.closePoint; }
-    else if (k === "bs") { S.backsight = el.value; $("backsight").value = el.value; }
-    else S.rows[i][k] = el.value;
+    var i = +el.dataset.i;
+    remember("r" + i + k);
+    S.rows[i][k] = el.value;
+    if (k === "angle" || k === "distance") delete S.rows[i].drawn;
     RUN = null; S.adjusted = null; save(); refresh();
   });
   $("body").addEventListener("change", function (e) {
     var el = e.target;
-    if (el.matches("select[data-k]")) { S.rows[+el.dataset.i].side = el.value; changed(true); }
+    if (el.matches("select[data-k]")) { remember(""); S.rows[+el.dataset.i].side = el.value; changed(true); }
     else if (el.matches('input[data-k="east"], input[data-k="north"]')) onCoord(el);
   });
+  $("body").addEventListener("focusin", function (e) { var tr = e.target.closest("tr[data-row]"); if (tr && +tr.dataset.row !== SEL) select(+tr.dataset.row, false); });
+  /* Enter moves down the column, as in a spreadsheet */
+  $("body").addEventListener("keydown", function (e) {
+    var el = e.target;
+    if (e.key !== "Enter" || !el.matches("input[data-k]")) return;
+    e.preventDefault();
+    if (el.dataset.k === "east" || el.dataset.k === "north") { el.blur(); return; }
+    var i = +el.dataset.i + (e.shiftKey ? -1 : 1), next = document.querySelector('#body input[data-i="' + i + '"][data-k="' + el.dataset.k + '"]');
+    if (next) { next.focus(); next.select(); }
+    else if (!e.shiftKey && !closed()) addRow();
+  });
   $("body").addEventListener("click", function (e) {
-    var b = e.target.closest("[data-del]"); if (!b) return;
-    S.rows.splice(+b.dataset.del, 1); changed(true);
+    var b = e.target.closest("[data-del], [data-ins], [data-empty]"); if (!b) return;
+    if (b.dataset.empty) { ({ load: function () { $("file").click(); }, row: function () { addRow(); }, sample: loadSample })[b.dataset.empty](); return; }
+    if (b.dataset.ins !== undefined) { addRow(+b.dataset.ins); return; }
+    remember(""); S.rows.splice(+b.dataset.del, 1); SEL = -1; changed(true);
+    toast("Row removed. Ctrl+Z puts it back.");
   });
   $("tab1").onclick = function () { show(1); };
   $("tab2").onclick = function () { show(2); };
+  $("statusPill").onclick = function () { show(2); };
   $("backBtn").onclick = function () { show(1); };
-  $("addBtn").onclick = addRow;
-  $("plan").addEventListener("click", function (ev) { var q = planPoint(ev); if (q) addByClick(q.E, q.N); });
+  $("rowBtn").onclick = function () { addRow(); };
+  $("addBtn").onclick = function () { setAdding(!adding); };
+  $("fitBtn").onclick = function () { resetView(); draw($("plan"), false); };
+  $("undoBtn").onclick = function () { restore(UNDO, REDO); };
+  $("redoBtn").onclick = function () { restore(REDO, UNDO); };
+
+  /* the plan: click adds (in add mode) or picks a point's row; wheel zooms; drag moves */
+  var drag = null;
+  $("plan").addEventListener("mousedown", function (ev) { var p = planXY(ev); drag = { x: p.x, y: p.y, tx: ZOOM.tx, ty: ZOOM.ty, moved: false }; });
+  window.addEventListener("mouseup", function () { if (drag && drag.moved) $("plan").classList.remove("grabbing"); setTimeout(function () { drag = null; }, 0); });
+  $("plan").addEventListener("mousemove", function (ev) {
+    var p = planXY(ev);
+    if (drag && (drag.moved || Math.hypot(p.x - drag.x, p.y - drag.y) > 4)) {
+      drag.moved = true; $("plan").classList.add("grabbing");
+      ZOOM.tx = drag.tx + p.x - drag.x; ZOOM.ty = drag.ty + p.y - drag.y;
+      $("tip").hidden = true; draw($("plan"), false); return;
+    }
+    HOVER = adding ? toWorld(p.x, p.y) : null;
+    var m = adding ? null : nearest(p.x, p.y);
+    $("plan").style.cursor = adding ? "" : m ? "pointer" : "grab";
+    showTip(m, p.x, p.y);
+    if (adding) draw($("plan"), false);
+  });
+  $("plan").addEventListener("mouseleave", function () { HOVER = null; $("tip").hidden = true; if (adding) draw($("plan"), false); });
+  $("plan").addEventListener("click", function (ev) {
+    if (drag && drag.moved) return;
+    var p = planXY(ev);
+    if (adding) { var w = toWorld(p.x, p.y); if (w) addByClick(w.E, w.N); return; }
+    var m = nearest(p.x, p.y);
+    if (m && m.row !== undefined && m.row >= 0) select(m.row, true);
+  });
+  $("plan").addEventListener("dblclick", function () { if (!adding) { resetView(); draw($("plan"), false); } });
+  $("plan").addEventListener("wheel", function (ev) {
+    ev.preventDefault();
+    var p = planXY(ev), k = Math.exp(-ev.deltaY * 0.0015), z = Math.min(Math.max(ZOOM.z * k, 0.2), 200);
+    k = z / ZOOM.z;
+    ZOOM.tx = p.x - (p.x - ZOOM.tx) * k; ZOOM.ty = p.y - (p.y - ZOOM.ty) * k; ZOOM.z = z;
+    $("tip").hidden = true; draw($("plan"), false);
+  }, { passive: false });
+
   $("loadBtn").onclick = function () { $("file").click(); };
   $("file").onchange = function (ev) { var file = ev.target.files[0]; if (file) openFile(file); ev.target.value = ""; };
-  $("setBtn").onclick = function () { renderSetup(); $("setOverlay").hidden = false; };
-  $("setClose").onclick = function () { $("setOverlay").hidden = true; };
-  $("sampleBtn").onclick = function () {
+  $("setBtn").onclick = openSettings;
+  $("setClose").onclick = closeSettings;
+  $("setX").onclick = closeSettings;
+  $("setOverlay").addEventListener("mousedown", function (e) { if (e.target === $("setOverlay")) closeSettings(); });
+  function loadSample() {
     if (S.rows.length && !confirm("Replace this traverse with the sample loop?")) return;
-    S = sampleJob(); syncType(); RUN = null; save(); renderAll(); $("setOverlay").hidden = true;
+    remember(""); S = sampleJob(); syncType(); RUN = null; SEL = -1; resetView(); save(); renderAll(); closeSettings();
     toast("Sample loaded: a primary loop on two pillars, observed with angles, levelled, with two side shots.");
-  };
+  }
+  $("sampleBtn").onclick = loadSample;
   $("newBtn").onclick = function () {
     if (S.rows.length && !confirm("Start a new traverse? Save this one first if you need it.")) return;
-    var keep = { angleMode: S.angleMode, fmt: S.fmt, angleDir: S.angleDir };
-    S = Object.assign(defaults(), keep); syncType(); RUN = null; save(); renderAll(); $("setOverlay").hidden = true; show(1);
+    remember("");
+    var keep = { angleMode: S.angleMode, fmt: S.fmt, angleDir: S.angleDir, cls: S.cls, tol: S.tol, sigma: S.sigma };
+    S = Object.assign(defaults(), keep); syncType(); RUN = null; SEL = -1; resetView(); save(); renderAll(); closeSettings(); show(1);
   };
   $("saveBtn").onclick = saveJob;
-  $("method").onchange = function () { S.method = $("method").value; changed(false); renderClose(); };
+  document.querySelectorAll("#methodSeg [data-method]").forEach(function (b) {
+    b.onclick = function () { if (S.method === b.dataset.method) return; remember(""); S.method = b.dataset.method; changed(false); renderClose(); };
+  });
   $("more").addEventListener("toggle", function () { if ($("more").open) draw($("plan2"), true); });
   $("applyBtn").onclick = apply;
   $("reportBtn").onclick = openReport;
   $("csvBtn").onclick = coordsCsv;
+  $("csv2Btn").onclick = coordsCsv;
   $("printBtn").onclick = function () { var w = $("reportFrame").contentWindow; w.focus(); w.print(); };
   $("saveRepBtn").onclick = function () { saveFile(REPORT, fileBase() + " report.html", "text/html;charset=utf-8"); };
   $("closeRepBtn").onclick = function () { $("reportOverlay").hidden = true; };
   document.addEventListener("dragover", function (e) { e.preventDefault(); });
   document.addEventListener("drop", function (e) { e.preventDefault(); var file = e.dataTransfer.files[0]; if (file) openFile(file); });
   document.addEventListener("keydown", function (e) {
-    var k = e.key.toLowerCase();
-    if ((e.ctrlKey || e.metaKey) && k === "s") { e.preventDefault(); saveJob(); }
-    else if ((e.ctrlKey || e.metaKey) && k === "o") { e.preventDefault(); $("file").click(); }
-    else if (e.key === "Escape") { $("reportOverlay").hidden = true; $("setOverlay").hidden = true; }
+    var k = e.key.toLowerCase(), mod = e.ctrlKey || e.metaKey, typing = /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName);
+    if (mod && k === "s") { e.preventDefault(); saveJob(); }
+    else if (mod && k === "o") { e.preventDefault(); $("file").click(); }
+    else if (mod && !e.shiftKey && k === "z" && !typing) { e.preventDefault(); restore(UNDO, REDO); }
+    else if (mod && (k === "y" || (e.shiftKey && k === "z")) && !typing) { e.preventDefault(); restore(REDO, UNDO); }
+    else if (e.key === "Escape") {
+      if (!$("reportOverlay").hidden) $("reportOverlay").hidden = true;
+      else if (!$("setOverlay").hidden) closeSettings();
+      else if (adding) setAdding(false);
+    }
   });
   var rsT = 0;
   window.addEventListener("resize", function () { clearTimeout(rsT); rsT = setTimeout(function () { draw($("plan"), false); if ($("more").open) draw($("plan2"), true); }, 120); });
@@ -1553,6 +2008,7 @@ var SURV = (function () {
   /* for checks from outside the page */
   window.TraversePro = { state: function () { return JSON.parse(JSON.stringify(S)); }, run: function () { RUN = null; return run(); }, importText: importText };
 
+  undoButtons();
   renderAll();
   if (location.hash === "#2") show(2);
 })();

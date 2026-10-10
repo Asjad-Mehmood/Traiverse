@@ -1,0 +1,99 @@
+name: Build and Release
+
+# Runs when you push a tag such as v1.0.1 (publishing a GitHub release with a new tag does this).
+#
+# This repository (Asjad-Mehmood/Traiverse) is public, so its releases are public too: every
+# installed copy reads latest.json and the installer from this repository's latest release.
+# The release description comes from docs/releases/<tag>.md when that file exists.
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check the traverse engine
+        run: node tools/check-engine.js
+
+      - name: Read version from tag
+        shell: pwsh
+        run: |
+          $ver = "${{ github.ref_name }}".TrimStart('v')
+          if ($ver -notmatch '^\d+\.\d+\.\d+$') { throw "A release tag is v and three numbers, for example v1.0.1. Got: ${{ github.ref_name }}" }
+          "VERSION=$ver" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Stamp version into versioninfo.json
+        shell: pwsh
+        working-directory: lite
+        run: |
+          $p = $env:VERSION.Split('.')
+          $j = Get-Content versioninfo.json -Raw | ConvertFrom-Json
+          foreach ($k in 'FileVersion','ProductVersion') {
+            $j.FixedFileInfo.$k.Major = [int]$p[0]
+            $j.FixedFileInfo.$k.Minor = [int]$p[1]
+            $j.FixedFileInfo.$k.Patch = [int]$p[2]
+            $j.FixedFileInfo.$k.Build = 0
+          }
+          $j.StringFileInfo.FileVersion = $env:VERSION
+          $j.StringFileInfo.ProductVersion = $env:VERSION
+          $j | ConvertTo-Json -Depth 10 | Set-Content versioninfo.json -Encoding utf8
+
+      - name: Build the program
+        shell: pwsh
+        working-directory: lite
+        run: |
+          Copy-Item ../app/index.html index.html
+          $today = (Get-Date).ToString("dd-MMM-yyyy")
+          $html = [System.IO.File]::ReadAllText("$pwd/index.html", [System.Text.Encoding]::UTF8)
+          $html = [System.Text.RegularExpressions.Regex]::Replace($html, '(?s)<span class="ver"[^>]*>.*?</span>', "<span class=`"ver`">Traverse Pro v$($env:VERSION) &middot; build $today</span>")
+          [System.IO.File]::WriteAllText("$pwd/index.html", $html, [System.Text.Encoding]::UTF8)
+          go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@latest
+          & "$(go env GOPATH)\bin\goversioninfo.exe" -64
+          go build -ldflags "-H=windowsgui -s -w -X main.appVersion=$env:VERSION" -o TraversePro.exe .
+
+      - name: Build the installer
+        shell: pwsh
+        working-directory: lite
+        run: |
+          if (-not (Test-Path "C:\Program Files (x86)\NSIS\makensis.exe")) { choco install nsis -y --no-progress }
+          & "C:\Program Files (x86)\NSIS\makensis.exe" "/DVERSION=$env:VERSION" installer.nsi
+          if (-not (Test-Path TraversePro-Setup.exe)) { throw "Installer was not created" }
+
+      - name: Write latest.json
+        shell: pwsh
+        working-directory: lite
+        run: |
+          $h = (Get-FileHash TraversePro-Setup.exe -Algorithm SHA256).Hash.ToLower()
+          '{"version":"' + $env:VERSION + '","sha256":"' + $h + '"}' | Set-Content latest.json -Encoding ascii
+
+      - name: Find the release notes
+        id: notes
+        shell: bash
+        run: |
+          f="docs/releases/${GITHUB_REF_NAME}.md"
+          if [ -f "$f" ]; then echo "path=$f" >> "$GITHUB_OUTPUT"; else echo "path=" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Traverse Pro ${{ github.ref_name }}
+          body_path: ${{ steps.notes.outputs.path }}
+          make_latest: true
+          files: |
+            lite/TraversePro-Setup.exe
+            lite/latest.json

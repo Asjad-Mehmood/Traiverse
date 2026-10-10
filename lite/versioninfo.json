@@ -1,0 +1,31 @@
+{
+  "FixedFileInfo": {
+    "FileVersion": {
+      "Major": 1,
+      "Minor": 0,
+      "Patch": 0,
+      "Build": 0
+    },
+    "ProductVersion": {
+      "Major": 1,
+      "Minor": 0,
+      "Patch": 0,
+      "Build": 0
+    }
+  },
+  "StringFileInfo": {
+    "FileDescription": "Traverse Pro - traverse closure and adjustment",
+    "ProductName": "Traverse Pro",
+    "FileVersion": "1.0.0",
+    "ProductVersion": "1.0.0",
+    "InternalName": "TraversePro",
+    "OriginalFilename": "TraversePro.exe"
+  },
+  "VarFileInfo": {
+    "Translation": {
+      "LangID": "0409",
+      "CharsetID": "04B0"
+    }
+  },
+  "IconPath": "icon.ico"
+}

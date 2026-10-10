@@ -1,0 +1,22 @@
+# Build outputs
+lite/*.exe
+lite/*.syso
+lite/index.html
+lite/latest.json
+*.exe
+
+# Logs & temp files
+*.log
+.temp/
+.cache/
+*.bak
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment / local files
+.env
+.env.local
+node_modules/

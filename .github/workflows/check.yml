@@ -1,0 +1,48 @@
+name: Check
+
+# On every push and pull request: the traverse engine still gives the known answers, and the
+# Windows program still builds. Nothing is published.
+on:
+  push:
+    branches-ignore:
+      - 'dependabot/**'
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check the traverse engine
+        run: node tools/check-engine.js
+
+      - name: Check the page's scripts parse
+        run: |
+          node -e '
+            const h = require("fs").readFileSync("app/index.html", "utf8");
+            const s = [...h.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]);
+            if (!s.length) throw new Error("no scripts found");
+            s.forEach(x => new Function(x));
+            console.log(s.length + " scripts parse");'
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Build the Windows program
+        working-directory: lite
+        env:
+          GOOS: windows
+          GOARCH: amd64
+        run: |
+          cp ../app/index.html index.html
+          go vet .
+          go build -ldflags "-H=windowsgui -s -w" -o TraversePro.exe .

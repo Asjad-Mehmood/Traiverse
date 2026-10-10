@@ -1,0 +1,1580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Traverse Pro</title>
+<style>
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; font: 13px "Segoe UI", Arial, sans-serif; background: #f2f2f2; color: #222; display: flex; flex-direction: column; }
+header { display: flex; align-items: center; gap: 10px; height: 46px; padding: 0 12px; background: #1e2a38; color: #fff; flex: none; }
+.brand { white-space: nowrap; font-weight: 600; }
+.brand b { display: inline-grid; place-items: center; width: 24px; height: 24px; border: 1px solid #c6a15a; color: #c6a15a; margin-right: 6px; }
+header nav { display: flex; gap: 4px; }
+header nav button, header > button, .ribbon button, .actions button, .btn {
+  height: 28px; border: 1px solid #c8c8c8; background: #fff; padding: 0 10px; cursor: pointer; font: inherit; color: inherit;
+}
+header nav button { background: transparent; color: #fff; border-color: #4a5a6a; }
+header nav button.on { background: #c6a15a; border-color: #c6a15a; color: #1e2a38; font-weight: 600; }
+header > button { background: transparent; color: #fff; border-color: #4a5a6a; }
+header > button:hover, header nav button:not(.on):hover { background: #2c3c4f; }
+.job { width: 220px; background: #2c3c4f; color: #fff; border: 1px solid #4a5a6a; height: 28px; padding: 0 8px; font: inherit; }
+.grow { flex: 1; }
+main { flex: 1; overflow: auto; }
+.ribbon { display: flex; gap: 8px; align-items: center; min-height: 36px; padding: 4px 8px; background: #2b2b2b; color: #fff; flex-wrap: wrap; }
+.ribbon button { background: #3a3a3a; color: #fff; border-color: #555; }
+.ribbon button:hover { background: #474747; }
+.ribbon .rs { color: #bbb; }
+.gold, .ribbon button.gold { background: #c6a15a; color: #1e2a38; border-color: #c6a15a; font-weight: 700; }
+.ribbon button.gold.on { background: #fff3d6; border-color: #fff3d6; box-shadow: inset 0 0 0 2px #c6a15a; }
+.setup { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px; background: #fff; border-bottom: 1px solid #ddd; }
+.setup fieldset { border: 1px solid #e0e0e0; margin: 0; padding: 4px 8px 8px; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: flex-end; }
+.setup legend { font-weight: 600; color: #1e2a38; padding: 0 4px; }
+.fld { display: flex; flex-direction: column; gap: 2px; font-size: 11px; color: #555; }
+.fld input, .fld select { color: #222; font-size: 13px; }
+.fld input { width: 110px; }
+.fld input.nm { width: 80px; }
+.fld input.sm { width: 64px; }
+.fld.chk { flex-direction: row; align-items: center; gap: 5px; font-size: 13px; color: #222; height: 26px; }
+.fld.chk input { width: auto; height: auto; }
+.controls { display: flex; gap: 12px; padding: 8px; background: #fff; border-bottom: 1px solid #ddd; flex-wrap: wrap; align-items: center; }
+.controls label { display: flex; align-items: center; gap: 6px; }
+input, select { height: 26px; border: 1px solid #ccc; padding: 0 6px; font: inherit; background: #fff; }
+input:focus, select:focus { outline: 2px solid #c6a15a; outline-offset: -1px; }
+input[readonly] { background: #f6f6f6; color: #555; }
+input.bad { border-color: #c0392b; background: #fdecea; }
+.table-wrap { overflow: auto; background: #fff; }
+table { width: 100%; border-collapse: collapse; background: #fff; }
+th, td { border: 1px solid #e4e4e4; padding: 4px 6px; text-align: center; white-space: nowrap; }
+th { background: #f6f6f6; font-weight: 600; }
+#list td { padding: 2px 3px; }
+#list input, #list select { width: 100%; min-width: 70px; border-color: #e6e6e6; }
+#list input.w-desc { min-width: 140px; }
+#list select { min-width: 100px; }
+#list td.ro { color: #444; background: #fafafa; font-variant-numeric: tabular-nums; }
+#list td.ro.adj { color: #14532d; background: #f0f8f2; }
+#list tr.side td { background: #fbf8f0; }
+#list tr.side td.ro { background: #f7f2e4; }
+#list tr.closing td:first-child { box-shadow: inset 3px 0 0 #c6a15a; }
+#list .x { width: 26px; min-width: 0; padding: 0; border: 1px solid #ddd; background: #fff; cursor: pointer; height: 24px; }
+#list .x:hover { background: #fdecea; border-color: #c0392b; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.plan-wrap { position: relative; background: #fff; border-top: 1px solid #ddd; }
+canvas { display: block; width: 100%; height: 360px; background: #fff; }
+canvas.clicking { cursor: crosshair; }
+.note { margin: 0; padding: 6px 10px; color: #666; }
+.dialog { margin: 10px; background: #fff; border: 1px solid #ccc; padding: 12px; }
+h1 { margin: 0 0 10px; font-size: 16px; }
+h2 { margin: 16px 0 6px; font-size: 13px; color: #1e2a38; }
+.actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+.primary { background: #1e2a38 !important; color: #fff !important; border-color: #1e2a38 !important; }
+.msgbox { margin: 10px 0; padding: 8px 10px; border: 1px solid #e5c07b; background: #fff8e6; }
+.msgbox.err { border-color: #e0a9a3; background: #fdecea; }
+.badge { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+.badge.pass { background: #dcf3e3; color: #14532d; }
+.badge.fail { background: #fbdcd8; color: #8a1c10; }
+.badge.na { background: #eee; color: #555; }
+#msg { min-height: 18px; margin: 8px 0 0; }
+#warnBox { margin: 8px 0 0; padding-left: 20px; color: #7a5300; }
+#warnBox:empty { display: none; }
+#adj tr.fixed td, #adj tr.fixed td.num { color: #555; background: #fafafa; }
+td.flag { color: #8a1c10; font-weight: 600; }
+.status { display: flex; gap: 10px; align-items: center; height: 24px; padding: 0 10px; background: #e7e7e7; border-top: 1px solid #d0d0d0; color: #444; font-size: 12px; flex: none; }
+.ver { color: #666; }
+.overlay { position: fixed; inset: 0; background: rgba(20, 28, 38, .55); display: flex; align-items: center; justify-content: center; z-index: 50; }
+.overlay[hidden] { display: none; }
+.sheet { background: #fff; width: min(1000px, 96vw); height: 92vh; display: flex; flex-direction: column; border: 1px solid #999; }
+.sheet .bar { display: flex; gap: 8px; align-items: center; padding: 8px; background: #1e2a38; color: #fff; }
+.sheet .bar button { height: 28px; border: 1px solid #4a5a6a; background: transparent; color: #fff; padding: 0 10px; cursor: pointer; font: inherit; }
+.sheet .bar button.gold { background: #c6a15a; color: #1e2a38; border-color: #c6a15a; }
+.sheet iframe { flex: 1; border: 0; width: 100%; background: #fff; }
+.upd { background: #fff; padding: 22px 26px; width: 380px; border-top: 4px solid #c6a15a; }
+.upd h3 { margin: 0 0 8px; font-size: 15px; }
+.upd p { margin: 0; color: #444; }
+.upd .bar2 { height: 4px; margin-top: 14px; background: #eee; overflow: hidden; }
+.upd .bar2 i { display: block; height: 100%; width: 40%; background: #c6a15a; animation: slide 1.2s infinite ease-in-out; }
+@keyframes slide { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
+.toast { position: fixed; right: 14px; bottom: 34px; background: #1e2a38; color: #fff; padding: 8px 12px; border-left: 4px solid #c6a15a; max-width: 420px; z-index: 60; }
+.toast[hidden] { display: none; }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><b>T</b> Traverse Pro</div>
+  <nav>
+    <button id="tab1" class="on" type="button">1&nbsp; Load and list</button>
+    <button id="tab2" type="button">2&nbsp; Close and adjust</button>
+  </nav>
+  <input id="job" class="job" aria-label="Job name" title="Job name: files are saved under it">
+  <div class="grow"></div>
+  <button id="newBtn" type="button" title="Start a new traverse">New</button>
+  <button id="saveBtn" type="button" title="Save the job (Ctrl+S)">Save</button>
+</header>
+
+<main>
+<section id="step1">
+  <div class="ribbon">
+    <button id="loadBtn" type="button" title="Open a CSV, TXT or a saved job (Ctrl+O)">Load traverse data</button>
+    <input id="file" type="file" accept=".csv,.txt,.json" hidden>
+    <button id="rowBtn" type="button">Add row</button>
+    <button id="addBtn" type="button" class="gold" aria-pressed="false" title="Then click on the plan to add a station there">Add point by click</button>
+    <button id="sampleBtn" type="button">Try the sample</button>
+    <span class="rs" id="ribbonInfo">Points and Lines</span>
+    <span class="grow"></span>
+    <button id="csvBtn" type="button" title="Station coordinates as a CSV sheet">Coordinates CSV</button>
+  </div>
+
+  <div class="setup">
+    <fieldset>
+      <legend>Traverse</legend>
+      <label class="fld">Kind
+        <select data-s="type"><option value="loop">Closed loop</option><option value="link">Closed link</option><option value="open">Open</option></select></label>
+      <label class="fld">Class
+        <select data-s="cls"><option value="primary">Primary</option><option value="secondary">Secondary</option><option value="tertiary">Tertiary</option><option value="custom">Custom</option></select></label>
+      <label class="fld">Angles typed as
+        <select data-s="fmt"><option value="dms">DDD.MMSS</option><option value="deg">Decimal degrees</option><option value="gon">Gons</option></select></label>
+      <label class="fld">Angles turned
+        <select data-s="angleDir"><option value="cw">Clockwise</option><option value="ccw">Anticlockwise</option></select></label>
+      <label class="fld">Scale factor <input data-s="scale" class="sm" style="width:96px"></label>
+    </fieldset>
+    <fieldset>
+      <legend>Start</legend>
+      <label class="fld">Station <input id="station" data-s="station" class="nm"></label>
+      <label class="fld">Start Easting <input id="startE" data-s="startE" data-n></label>
+      <label class="fld">Start Northing <input id="startN" data-s="startN" data-n></label>
+      <label class="fld">Level <input data-s="startH" data-n class="sm"></label>
+    </fieldset>
+    <fieldset>
+      <legend>Backsight</legend>
+      <label class="fld">Orientation
+        <select data-s="bsMode"><option value="point">Backsight point</option><option value="bearing">Bearing</option></select></label>
+      <label class="fld">Backsight <input id="backsight" data-s="backsight" class="nm"></label>
+      <label class="fld bs-pt">Easting <input data-s="bsE" data-n></label>
+      <label class="fld bs-pt">Northing <input data-s="bsN" data-n></label>
+      <label class="fld bs-brg">Bearing to it <input data-s="bsBrg" data-a class="nm" style="width:96px"></label>
+    </fieldset>
+    <fieldset>
+      <legend>Close</legend>
+      <label class="fld">Close point <input id="closePoint" data-s="closePoint" class="nm"></label>
+      <label class="fld cl-link">Easting <input data-s="closeE" data-n></label>
+      <label class="fld cl-link">Northing <input data-s="closeN" data-n></label>
+      <label class="fld cl-link">Level <input data-s="closeH" data-n class="sm"></label>
+      <label class="fld cl-closed">Closing orientation
+        <select data-s="closeMode"><option value="point" id="closePointOpt">Back onto the backsight</option><option value="bearing">Bearing</option><option value="none">None</option></select></label>
+      <label class="fld fs-pt">Foresight <input data-s="fsName" class="nm"></label>
+      <label class="fld fs-pt">Easting <input data-s="fsE" data-n></label>
+      <label class="fld fs-pt">Northing <input data-s="fsN" data-n></label>
+      <label class="fld fs-brg">Bearing to it <input data-s="fsBrg" data-a class="nm" style="width:96px"></label>
+      <label class="fld fs-ang">Closing angle <input data-s="closeAngle" data-a class="nm" style="width:96px"></label>
+    </fieldset>
+    <fieldset>
+      <legend>Tolerance</legend>
+      <label class="fld">Angular ″ × √n <input data-s="tol.angK" data-n class="sm"></label>
+      <label class="fld">Precision 1 : <input data-s="tol.ratio" data-n class="sm" style="width:80px"></label>
+      <label class="fld chk"><input type="checkbox" data-s="useH"> Carry levels</label>
+      <label class="fld lv">Levels mm × √km <input data-s="tol.hC" data-n class="sm"></label>
+    </fieldset>
+  </div>
+
+  <div class="table-wrap">
+    <table id="list">
+      <thead>
+        <tr>
+          <th></th><th>Side</th><th>Station</th><th>Backsight</th><th>Angle</th><th>Distance</th><th class="lv">Ht diff</th>
+          <th>Easting</th><th>Northing</th><th class="lv">Level</th><th>Name</th><th>Description</th><th></th>
+        </tr>
+      </thead>
+      <tbody id="body"></tbody>
+    </table>
+  </div>
+  <div class="plan-wrap"><canvas id="plan"></canvas></div>
+  <p class="note" id="note1">Each row is one set-up: at <b>Station</b>, sighting back to <b>Backsight</b>, turn the <b>Angle</b> and measure the <b>Distance</b> to the new point, <b>Name</b>.
+    A <b>Side shot</b> row is taken from the same set-up as the traverse row above it and is not part of the adjustment.
+    Easting and Northing are worked out for you.</p>
+</section>
+
+<section id="step2" hidden>
+  <div class="dialog">
+    <h1>Close and adjusted values</h1>
+    <div class="controls">
+      <label>Station <input id="station2" readonly></label>
+      <label>Backsight <input id="backsight2" readonly></label>
+      <label>Close point <input id="closePoint2" readonly></label>
+      <label>Adjustment
+        <select id="method"><option value="bowditch">Compass (Bowditch)</option><option value="transit">Transit</option><option value="lsq">Least squares</option></select>
+      </label>
+      <span id="sigmaBox">
+        <label>σ angle ″ <input data-s="sigma.ang" data-n style="width:54px"></label>
+        <label>σ distance mm <input data-s="sigma.dA" data-n style="width:54px"></label>
+        <label>+ ppm <input data-s="sigma.dB" data-n style="width:54px"></label>
+      </span>
+    </div>
+    <div id="closeErr" class="msgbox err" hidden></div>
+    <div id="closeOut">
+      <h2>Closure</h2>
+      <table>
+        <thead><tr><th>Name</th><th>Precision</th><th>Error Distance</th><th>Error Direction</th><th>Error E</th><th>Error N</th><th>Area</th><th>Perimeter</th></tr></thead>
+        <tbody id="summary"></tbody>
+      </table>
+      <h2>Checks</h2>
+      <table>
+        <thead><tr><th>Check</th><th>Found</th><th>Allowed</th><th>Result</th></tr></thead>
+        <tbody id="checks"></tbody>
+      </table>
+      <div id="lsqBox"></div>
+      <h2>Adjusted values</h2>
+      <div class="table-wrap">
+        <table>
+          <thead id="adjHead"></thead>
+          <tbody id="adj"></tbody>
+        </table>
+      </div>
+      <h2>Angles</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Station</th><th>Backsight</th><th>Foresight</th><th>Observed</th><th>Correction</th><th>Adjusted</th></tr></thead>
+          <tbody id="angles"></tbody>
+        </table>
+      </div>
+      <div id="sideBox"></div>
+      <ul id="warnBox"></ul>
+      <h2>Plan</h2>
+      <canvas id="plan2"></canvas>
+    </div>
+    <div class="actions">
+      <button id="applyBtn" type="button" class="primary">Apply Adjustment</button>
+      <button id="reportBtn" type="button">Generate Report</button>
+      <button id="csv2Btn" type="button">Coordinates CSV</button>
+      <button id="backBtn" type="button">Back to list</button>
+    </div>
+    <p id="msg"></p>
+  </div>
+</section>
+</main>
+
+<footer class="status"><span id="statusTx"></span><span class="grow"></span><span class="ver">Traverse Pro dev</span></footer>
+
+<div id="reportOverlay" class="overlay" hidden>
+  <div class="sheet" role="dialog" aria-label="Report">
+    <div class="bar"><b>Report</b><span class="grow"></span>
+      <button id="printBtn" type="button" class="gold" title="Print, or choose Microsoft Print to PDF">Print or PDF</button>
+      <button id="saveRepBtn" type="button">Save report (HTML)</button>
+      <button id="closeRepBtn" type="button">Close</button>
+    </div>
+    <iframe id="reportFrame" title="Report preview"></iframe>
+  </div>
+</div>
+
+<div id="updateOverlay" class="overlay" hidden>
+  <div class="upd" role="alertdialog" aria-live="polite">
+    <h3 id="updTitle">Downloading update…</h3>
+    <p id="updDesc"></p>
+    <div class="bar2"><i></i></div>
+  </div>
+</div>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+/* ENGINE START: copied unchanged from Excel to KML (kml-convertor-src, app/index.html, SURV).
+   Keep the two in step: a fix to the arithmetic there belongs here too. */
+/* ================= traverse and level adjustment: the arithmetic =================
+   Pure functions, no page. A traverse is closed (loop or link) or open, adjusted by
+   Bowditch, Transit or least squares; a level run is reduced by rise and fall (or
+   from height differences) and its misclosure spread along it. */
+var SURV = (function () {
+  var D2R = Math.PI / 180, R2D = 180 / Math.PI, S2R = Math.PI / 648000;
+  function n360(a) { a = a % 360; if (a < 0) a += 360; if (a >= 360 - 1e-12) a = 0; return a; }
+  function n180(a) { a = n360(a); return a > 180 ? a - 360 : a; }
+
+  /* an angle as typed: 123.4530 (DDD.MMSS), 123°45'30", 123 45 30, decimal degrees or gons */
+  function parseAngle(raw, fmt) {
+    if (raw === null || raw === undefined) return null;
+    var s = String(raw).trim();
+    if (s === "") return null;
+    var neg = false, v;
+    if (s.charAt(0) === "-") { neg = true; s = s.slice(1).trim(); }
+    if (/[°'"′″\s:dms]/i.test(s)) {
+      var parts = s.split(/[^0-9.]+/).filter(Boolean).map(Number);
+      if (!parts.length || parts.length > 3 || parts.some(function (x) { return isNaN(x); })) return NaN;
+      var m0 = parts[1] || 0, s0 = parts[2] || 0;
+      if (m0 >= 60 || s0 >= 60) return NaN;
+      v = parts[0] + m0 / 60 + s0 / 3600;
+    } else if (!/^\d*\.?\d*$/.test(s) || s === ".") {
+      return NaN;
+    } else if (fmt === "deg") {
+      v = parseFloat(s);
+    } else if (fmt === "gon") {
+      v = parseFloat(s) * 0.9;
+    } else {
+      var ip = s.split(".")[0], fp = s.split(".")[1] || "";
+      var d = parseInt(ip || "0", 10), f = fp + "0000";
+      var mm = parseInt(f.slice(0, 2), 10);
+      var ss = parseFloat(f.slice(2, 4) + (fp.length > 4 ? "." + fp.slice(4) : ""));
+      if (mm >= 60 || ss >= 60) return NaN;
+      v = d + mm / 60 + ss / 3600;
+    }
+    if (isNaN(v)) return NaN;
+    return neg ? -v : v;
+  }
+
+  function fmtDMS(deg, dp, padDeg) {
+    if (deg === null || deg === undefined || isNaN(deg)) return "";
+    if (dp === undefined) dp = 1;
+    var sign = deg < 0 ? "-" : "", k = Math.pow(10, dp);
+    var t = Math.round(Math.abs(deg) * 3600 * k);
+    var d = Math.floor(t / (3600 * k)); t -= d * 3600 * k;
+    var m = Math.floor(t / (60 * k)); t -= m * 60 * k;
+    var s = (t / k).toFixed(dp);
+    if (s.indexOf(".") === 1 || (dp === 0 && s.length === 1)) s = "0" + s;
+    var ds = String(d);
+    if (padDeg !== false) while (ds.length < 3) ds = "0" + ds;
+    return sign + ds + "°" + (m < 10 ? "0" : "") + m + "'" + s + '"';
+  }
+  function fmtSec(sec, dp) { return (sec >= 0 ? "+" : "") + sec.toFixed(dp === undefined ? 1 : dp) + '"'; }
+  function azimuth(E1, N1, E2, N2) { return n360(Math.atan2(E2 - E1, N2 - N1) * R2D); }
+  function dist2D(E1, N1, E2, N2) { return Math.sqrt((E2 - E1) * (E2 - E1) + (N2 - N1) * (N2 - N1)); }
+  function sum(a) { var s = 0; for (var i = 0; i < a.length; i++) s += a[i]; return s; }
+
+  /* ---- small dense linear algebra ---- */
+  function zeros(n) { var a = []; for (var i = 0; i < n; i++) a.push(new Float64Array(n)); return a; }
+  function cholesky(A, n) {
+    var L = zeros(n);
+    for (var i = 0; i < n; i++) {
+      for (var j = 0; j <= i; j++) {
+        var s = A[i][j];
+        for (var k = 0; k < j; k++) s -= L[i][k] * L[j][k];
+        if (i === j) {
+          if (s <= 1e-30) throw new Error("The traverse geometry is not fixed. Check the control points and the orientation.");
+          L[i][i] = Math.sqrt(s);
+        } else L[i][j] = s / L[j][j];
+      }
+    }
+    return L;
+  }
+  function cholSolve(L, b, n) {
+    var y = new Float64Array(n), x = new Float64Array(n), i, k, s;
+    for (i = 0; i < n; i++) { s = b[i]; for (k = 0; k < i; k++) s -= L[i][k] * y[k]; y[i] = s / L[i][i]; }
+    for (i = n - 1; i >= 0; i--) { s = y[i]; for (k = i + 1; k < n; k++) s -= L[k][i] * x[k]; x[i] = s / L[i][i]; }
+    return x;
+  }
+
+  /* ---- chi-square quantile, from the regularized gamma function ---- */
+  function gammaln(x) {
+    var c = [76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5];
+    var y = x, tmp = x + 5.5; tmp -= (x + 0.5) * Math.log(tmp);
+    var ser = 1.000000000190015;
+    for (var j = 0; j < 6; j++) ser += c[j] / ++y;
+    return -tmp + Math.log(2.5066282746310005 * ser / x);
+  }
+  function gammp(a, x) {
+    if (x <= 0) return 0;
+    if (x < a + 1) {
+      var ap = a, sm = 1 / a, del = sm;
+      for (var n = 0; n < 500; n++) { ap++; del *= x / ap; sm += del; if (Math.abs(del) < Math.abs(sm) * 1e-15) break; }
+      return sm * Math.exp(-x + a * Math.log(x) - gammaln(a));
+    }
+    var b = x + 1 - a, c = 1e300, d = 1 / b, h = d;
+    for (var i = 1; i < 500; i++) {
+      var an = -i * (i - a); b += 2;
+      d = an * d + b; if (Math.abs(d) < 1e-300) d = 1e-300;
+      c = b + an / c; if (Math.abs(c) < 1e-300) c = 1e-300;
+      d = 1 / d; var dl = d * c; h *= dl; if (Math.abs(dl - 1) < 1e-15) break;
+    }
+    return 1 - Math.exp(-x + a * Math.log(x) - gammaln(a)) * h;
+  }
+  function chi2inv(p, dof) {
+    var lo = 0, hi = Math.max(10, dof * 10 + 100);
+    for (var i = 0; i < 200; i++) { var mid = (lo + hi) / 2; if (gammp(dof / 2, mid / 2) < p) lo = mid; else hi = mid; }
+    return (lo + hi) / 2;
+  }
+
+  /* ---- one traverse ----
+     t: type loop|link|open, method bowditch|transit|lsq, angleDir cw|ccw, scale,
+        startPt/endPt {name,E,N,H}, startOri/endOri {mode,az}, rows [{name, angle, dist, dh}],
+        tol {angK, ratio, hC}, sigma {ang, dA, dB}, useH */
+  function compute(t) {
+    var warnings = [], rows = t.rows, n = rows.length, legs = n - 1, i;
+    var closed = t.type !== "open";
+    if (n < 2) throw new Error("Add at least two stations, so there is one leg to work out.");
+    if (!t.startPt) throw new Error("Choose a start station with known coordinates.");
+    if (t.type === "link" && !t.endPt) throw new Error("Choose a closing station with known coordinates.");
+    if (!(t.scale > 0)) throw new Error("The scale factor must be a number above 0.");
+    if (t.startOri.az === null || t.startOri.az === undefined || isNaN(t.startOri.az)) throw new Error("The opening orientation is missing. Set a backsight point or bearing.");
+
+    var useStartAngle = t.startOri.mode !== "firstleg";
+    var hasClose = closed && t.endOri.mode !== "none";
+    if (hasClose && (t.endOri.az === null || t.endOri.az === undefined || isNaN(t.endOri.az))) throw new Error("The closing orientation is missing. Set a foresight point or bearing, or choose No closing angle.");
+    var angleRequired = function (k) { return k === 0 ? useStartAngle : k === n - 1 ? hasClose : true; };
+    var label = function (k) { return rows[k].name || "row " + (k + 1); };
+
+    for (i = 0; i < legs; i++) {
+      if (!(rows[i].dist > 0)) throw new Error("The distance " + label(i) + " to " + label(i + 1) + " is missing or not above 0.");
+    }
+    var obsAng = rows.map(function (r, k) {
+      if (!angleRequired(k)) return null;
+      if (r.angle === null || r.angle === undefined) throw new Error("The angle at " + label(k) + " is missing.");
+      if (isNaN(r.angle)) throw new Error("The angle at " + label(k) + " could not be read. Check how it is typed.");
+      return t.angleDir === "ccw" ? n360(360 - r.angle) : n360(r.angle);
+    });
+    var names = rows.map(function (r) { return String(r.name || "").trim(); });
+    names.forEach(function (nm, k) { if (!nm) throw new Error("A station name is missing on row " + (k + 1) + "."); });
+    var seen = {}; seen[names[0]] = 1; if (closed) seen[names[n - 1]] = 1;
+    names.slice(1, closed ? n - 1 : n).forEach(function (nm) {
+      if (seen[nm]) throw new Error("The station name " + nm + " is used more than once in this traverse.");
+      seen[nm] = 1;
+    });
+    var nAng = obsAng.filter(function (a) { return a !== null; }).length;
+
+    var bearings = function (A) {
+      var az = new Array(legs);
+      az[0] = n360(useStartAngle ? t.startOri.az + A[0] : t.startOri.az);
+      for (var k = 1; k < legs; k++) az[k] = n360(az[k - 1] + 180 + A[k]);
+      return { az: az, close: hasClose ? n360(az[legs - 1] + 180 + A[n - 1]) : null };
+    };
+    var raw = bearings(obsAng), angMis = null, corr = 0;
+    if (hasClose) { angMis = n180(raw.close - t.endOri.az) * 3600; corr = -angMis / nAng; }
+    var balAng = obsAng.map(function (a) { return a === null ? null : n360(a + corr / 3600); });
+    var bal = bearings(balAng);
+
+    var sd = rows.slice(0, legs).map(function (r) { return r.dist; });
+    var d = sd.map(function (x) { return x * t.scale; });
+    var sumD = sum(d);
+    var dE = bal.az.map(function (az, k) { return d[k] * Math.sin(az * D2R); });
+    var dN = bal.az.map(function (az, k) { return d[k] * Math.cos(az * D2R); });
+    var S = t.startPt, endPt = t.type === "loop" ? S : t.endPt;
+
+    var fE = null, fN = null, fL = null, precision = null;
+    var cE = [], cN = [];
+    for (i = 0; i < legs; i++) { cE.push(0); cN.push(0); }
+    if (closed) {
+      fE = sum(dE) - (endPt.E - S.E);
+      fN = sum(dN) - (endPt.N - S.N);
+      fL = Math.sqrt(fE * fE + fN * fN);
+      precision = fL > 0 ? sumD / fL : Infinity;
+      var sAE = 0, sAN = 0;
+      for (i = 0; i < legs; i++) { sAE += Math.abs(dE[i]); sAN += Math.abs(dN[i]); }
+      for (i = 0; i < legs; i++) {
+        if (t.method === "transit" && sAE > 0 && sAN > 0) { cE[i] = -fE * Math.abs(dE[i]) / sAE; cN[i] = -fN * Math.abs(dN[i]) / sAN; }
+        else { cE[i] = -fE * d[i] / sumD; cN[i] = -fN * d[i] / sumD; }
+      }
+    }
+    var E = [S.E], N = [S.N];
+    for (i = 0; i < legs; i++) { E.push(E[i] + dE[i] + cE[i]); N.push(N[i] + dN[i] + cN[i]); }
+    if (closed) { E[n - 1] = endPt.E; N[n - 1] = endPt.N; }
+
+    /* heights from the height difference of each leg */
+    var H = null, fH = null, hAllow = null, cH = null, dH = null;
+    var noH = function (v) { return v === null || v === undefined || isNaN(v); };
+    if (t.useH) {
+      var dhs = rows.slice(0, legs).map(function (r) { return r.dh; });
+      var miss = -1;
+      for (i = 0; i < dhs.length; i++) if (noH(dhs[i])) { miss = i; break; }
+      if (noH(S.H)) warnings.push("Heights left out: the start station has no known height.");
+      else if (miss >= 0) warnings.push("Heights left out: the height difference " + names[miss] + " to " + names[miss + 1] + " is missing.");
+      else if (closed && noH(endPt.H)) warnings.push("Heights left out: the closing station has no known height.");
+      else {
+        dH = dhs; cH = dhs.map(function () { return 0; });
+        if (closed) {
+          fH = sum(dhs) - (endPt.H - S.H);
+          for (i = 0; i < legs; i++) cH[i] = -fH * d[i] / sumD;
+          hAllow = t.tol.hC * Math.sqrt(sumD / 1000) / 1000;
+        }
+        H = [S.H];
+        for (i = 0; i < legs; i++) H.push(H[i] + dhs[i] + cH[i]);
+        if (closed) H[n - 1] = endPt.H;
+      }
+    }
+
+    var angAllow = t.tol.angK * Math.sqrt(nAng);
+    var closure = {
+      hasClose: hasClose, nAng: nAng, angMis: angMis, angAllow: angAllow,
+      angPass: hasClose ? Math.abs(angMis) <= angAllow + 1e-9 : null, angCorr: hasClose ? corr : null,
+      fE: fE, fN: fN, fL: fL, sumD: sumD, precision: precision, ratioReq: t.tol.ratio,
+      precPass: closed ? precision >= t.tol.ratio : null,
+      fH: fH, hAllow: hAllow, hPass: fH !== null ? Math.abs(fH) <= hAllow + 1e-12 : null
+    };
+    var res = {
+      type: t.type, method: t.method, closed: closed, names: names, warnings: warnings, closure: closure,
+      rows: rows.map(function (r, k) { return { name: names[k], obs: obsAng[k] }; }),
+      balAng: balAng, rawAz: raw.az, balAz: bal.az, sd: sd, d: d, dE: dE, dN: dN, cE: cE, cN: cN, dH: dH, cH: cH,
+      E: E, N: N, H: H, lsq: null
+    };
+    if (t.method === "lsq") {
+      if (!closed) warnings.push("Least squares needs a closed traverse, so this open traverse is worked out without an adjustment.");
+      else res.lsq = leastSquares(t, res, obsAng, useStartAngle);
+    }
+    if (!closed) warnings.push("An open traverse has no closure, so a mistake in the observations cannot be found.");
+
+    var Ef = res.lsq ? res.lsq.E : E, Nf = res.lsq ? res.lsq.N : N;
+    res.finalE = Ef; res.finalN = Nf;
+    res.adjLegs = [];
+    for (i = 0; i < legs; i++) {
+      res.adjLegs.push({
+        from: names[i], to: names[i + 1], az: azimuth(Ef[i], Nf[i], Ef[i + 1], Nf[i + 1]),
+        d: dist2D(Ef[i], Nf[i], Ef[i + 1], Nf[i + 1]), dh: H ? H[i + 1] - H[i] : null
+      });
+    }
+    res.adjAng = obsAng.map(function (a, k) {
+      if (a === null) return null;
+      if (!res.lsq) return balAng[k];
+      var bsAz = k === 0 ? t.startOri.az : azimuth(Ef[k], Nf[k], Ef[k - 1], Nf[k - 1]), fsAz;
+      if (k === n - 1) fsAz = t.endOri.mode === "firstleg" ? azimuth(Ef[k], Nf[k], Ef[1], Nf[1]) : t.endOri.az;
+      else fsAz = azimuth(Ef[k], Nf[k], Ef[k + 1], Nf[k + 1]);
+      return n360(fsAz - bsAz);
+    });
+    res.stations = names.map(function (nm, k) {
+      var fixed = k === 0 || (closed && k === n - 1);
+      var st = { name: nm, E: Ef[k], N: Nf[k], H: H ? H[k] : null, fixed: fixed };
+      if (res.lsq && !fixed && res.lsq.stat[k]) {
+        var q = res.lsq.stat[k];
+        st.sE = q.sE; st.sN = q.sN; st.ellA = q.ellA; st.ellB = q.ellB; st.ellAz = q.ellAz;
+      }
+      return st;
+    });
+    return res;
+  }
+
+  /* least squares on the angles and distances: coordinates of the new stations are the unknowns */
+  function leastSquares(t, cls, obsAng, useStartAngle) {
+    var rows = t.rows, n = rows.length, legs = n - 1, i, j, k;
+    var S = t.startPt, Ept = t.type === "loop" ? S : t.endPt;
+    var uIdx = rows.map(function (r, q) { return q === 0 || q === n - 1 ? -1 : q - 1; });
+    var u = 2 * (n - 2);
+    if (u === 0) return null;
+    var x = new Float64Array(u);
+    for (i = 1; i < n - 1; i++) { x[2 * (i - 1)] = cls.E[i]; x[2 * (i - 1) + 1] = cls.N[i]; }
+    var coord = function (q) { return q === 0 ? [S.E, S.N] : q === n - 1 ? [Ept.E, Ept.N] : [x[2 * uIdx[q]], x[2 * uIdx[q] + 1]]; };
+
+    var obs = [];
+    for (i = 0; i < legs; i++) {
+      var dd = rows[i].dist * t.scale;
+      var sg = Math.sqrt(Math.pow(t.sigma.dA / 1000, 2) + Math.pow(t.sigma.dB * 1e-6 * dd, 2));
+      obs.push({ type: "dist", from: i, to: i + 1, val: dd, sig: Math.max(sg, 1e-6) });
+    }
+    var sigA = Math.max(t.sigma.ang, 0.01) * S2R;
+    for (i = 0; i < n; i++) {
+      if (obsAng[i] === null) continue;
+      var bs = i === 0 ? { az: t.startOri.az } : { row: i - 1 }, fs;
+      if (i === n - 1) fs = t.endOri.mode === "firstleg" ? { row: 1 } : { az: t.endOri.az };
+      else fs = { row: i + 1 };
+      obs.push({ type: "ang", at: i, bs: bs, fs: fs, val: obsAng[i] * D2R, sig: sigA });
+    }
+    if (!useStartAngle) obs.push({ type: "az", from: 0, to: 1, val: t.startOri.az * D2R, sig: 0.001 * S2R, fixed: true });
+
+    var m = obs.length, r = m - u;
+    var dirAz = function (a1, b1, row, sign) {
+      var p1 = coord(a1), p2 = coord(b1);
+      var de = p2[0] - p1[0], dn = p2[1] - p1[1], d2 = de * de + dn * dn;
+      if (uIdx[b1] >= 0) { row[2 * uIdx[b1]] += sign * dn / d2; row[2 * uIdx[b1] + 1] += sign * -de / d2; }
+      if (uIdx[a1] >= 0) { row[2 * uIdx[a1]] += sign * -dn / d2; row[2 * uIdx[a1] + 1] += sign * de / d2; }
+      return Math.atan2(de, dn);
+    };
+    var wrap = function (v) { v = v % (2 * Math.PI); if (v > Math.PI) v -= 2 * Math.PI; if (v <= -Math.PI) v += 2 * Math.PI; return v; };
+    var evalObs = function (o) {
+      var a = new Float64Array(u), f;
+      if (o.type === "dist") {
+        var p1 = coord(o.from), p2 = coord(o.to);
+        var de = p2[0] - p1[0], dn = p2[1] - p1[1], dl = Math.sqrt(de * de + dn * dn);
+        if (uIdx[o.to] >= 0) { a[2 * uIdx[o.to]] += de / dl; a[2 * uIdx[o.to] + 1] += dn / dl; }
+        if (uIdx[o.from] >= 0) { a[2 * uIdx[o.from]] -= de / dl; a[2 * uIdx[o.from] + 1] -= dn / dl; }
+        return { a: a, misc: o.val - dl, f: dl };
+      }
+      if (o.type === "az") { f = dirAz(o.from, o.to, a, 1); return { a: a, misc: wrap(o.val - f), f: f }; }
+      var fsAz = o.fs.row !== undefined ? dirAz(o.at, o.fs.row, a, 1) : o.fs.az * D2R;
+      var bsAz = o.bs.row !== undefined ? dirAz(o.at, o.bs.row, a, -1) : o.bs.az * D2R;
+      f = fsAz - bsAz;
+      return { a: a, misc: wrap(o.val - f), f: f };
+    };
+    var normals = function (evs) {
+      var Nm = zeros(u), b = new Float64Array(u);
+      evs.forEach(function (ev, q) {
+        var p = 1 / (obs[q].sig * obs[q].sig), nz = [];
+        for (var c = 0; c < u; c++) if (ev.a[c] !== 0) nz.push(c);
+        nz.forEach(function (j1) {
+          b[j1] += ev.a[j1] * p * ev.misc;
+          nz.forEach(function (k1) { Nm[j1][k1] += ev.a[j1] * p * ev.a[k1]; });
+        });
+      });
+      return { Nm: Nm, b: b };
+    };
+
+    var iter = 0, maxDx = Infinity, L;
+    while (iter < 25 && maxDx > 1e-7) {
+      iter++;
+      var ne = normals(obs.map(evalObs));
+      L = cholesky(ne.Nm, u);
+      var dx = cholSolve(L, ne.b, u);
+      maxDx = 0;
+      for (k = 0; k < u; k++) { x[k] += dx[k]; maxDx = Math.max(maxDx, Math.abs(dx[k])); }
+    }
+    if (maxDx > 1e-4) throw new Error("Least squares did not settle. Look for a gross mistake: a wrong angle or distance.");
+    var evals = obs.map(evalObs);
+    L = cholesky(normals(evals).Nm, u);
+    var Q = [];
+    for (k = 0; k < u; k++) { var e = new Float64Array(u); e[k] = 1; Q.push(cholSolve(L, e, u)); }
+    var vtpv = 0;
+    var resid = obs.map(function (o, q) {
+      var v = -evals[q].misc, p = 1 / (o.sig * o.sig);
+      vtpv += v * v * p;
+      var a = evals[q].a, aqa = 0;
+      for (j = 0; j < u; j++) if (a[j]) for (k = 0; k < u; k++) if (a[k]) aqa += a[j] * Q[j][k] * a[k];
+      var qvv = o.sig * o.sig - aqa, sv = qvv > 1e-20 ? Math.sqrt(qvv) : 0;
+      return { v: v, std: sv > 0 && !o.fixed ? v / sv : null };
+    });
+    var s02 = r > 0 ? vtpv / r : 1, chi = null;
+    if (r > 0) {
+      var lo = chi2inv(0.025, r), hi = chi2inv(0.975, r);
+      chi = { value: vtpv, lo: lo, hi: hi, pass: vtpv >= lo && vtpv <= hi };
+    }
+    var E = cls.E.slice(), N = cls.N.slice();
+    for (i = 1; i < n - 1; i++) { E[i] = x[2 * (i - 1)]; N[i] = x[2 * (i - 1) + 1]; }
+    if (t.type === "loop") { E[n - 1] = S.E; N[n - 1] = S.N; }
+    var stat = {}, k95 = Math.sqrt(chi2inv(0.95, 2));
+    for (i = 1; i < n - 1; i++) {
+      j = 2 * (i - 1);
+      var vE = s02 * Q[j][j], vN = s02 * Q[j + 1][j + 1], cEN = s02 * Q[j][j + 1];
+      var mean = (vE + vN) / 2, rad = Math.sqrt(Math.pow((vN - vE) / 2, 2) + cEN * cEN);
+      stat[i] = {
+        sE: Math.sqrt(vE), sN: Math.sqrt(vN),
+        ellA: Math.sqrt(Math.max(mean + rad, 0)) * k95, ellB: Math.sqrt(Math.max(mean - rad, 0)) * k95,
+        ellAz: n360(0.5 * Math.atan2(2 * cEN, vN - vE) * R2D) % 180
+      };
+    }
+    var nm = function (q) { return rows[q].name; };
+    var obsOut = obs.map(function (o, q) {
+      var o2 = { type: o.type, std: resid[q].std, flag: resid[q].std !== null && Math.abs(resid[q].std) > 3 };
+      if (o.type === "dist") {
+        o2.label = "Distance"; o2.at = nm(o.from); o2.to = nm(o.to); o2.obs = o.val; o2.adj = evals[q].f;
+        o2.v = resid[q].v; o2.sigma = o.sig; o2.unit = "m";
+      } else if (o.type === "az") {
+        o2.label = "Fixed bearing"; o2.at = nm(o.from); o2.to = nm(o.to); o2.obs = o.val * R2D; o2.adj = n360(evals[q].f * R2D);
+        o2.v = resid[q].v / S2R; o2.sigma = o.sig / S2R; o2.unit = "sec";
+      } else {
+        o2.label = "Angle"; o2.at = nm(o.at);
+        o2.to = (o.bs.row !== undefined ? nm(o.bs.row) : "BS") + " to " + (o.fs.row !== undefined ? nm(o.fs.row) : "FS");
+        o2.obs = o.val * R2D; o2.adj = n360(evals[q].f * R2D); o2.v = resid[q].v / S2R; o2.sigma = o.sig / S2R; o2.unit = "sec";
+      }
+      return o2;
+    });
+    return { E: E, N: N, iter: iter, m: m, u: u, r: r, vtpv: vtpv, s02: s02, s0: Math.sqrt(s02), chi: chi, stat: stat, obs: obsOut, k95: k95 };
+  }
+
+  /* ---- one level run ----
+     L: mode "staff" (rows {pt, bs, is, fs, dist}) or "dh" (rows {pt, dh, dist}),
+        startRL, closeRL (null: no closing benchmark), C (mm per root km), spread "dist"|"setups".
+     The first row is the starting benchmark; in staff mode it carries the first backsight.
+     A row with both a foresight and a backsight is a change point. */
+  function levels(L) {
+    var rows = L.rows, n = rows.length, i, warnings = [];
+    var bad = function (v) { return v === null || v === undefined || isNaN(v); };
+    if (n < 2) throw new Error("Add at least two rows: the benchmark you start on and one more staff position.");
+    if (bad(L.startRL)) throw new Error("The starting benchmark needs a known level.");
+    rows.forEach(function (r, k) { if (!String(r.pt || "").trim()) throw new Error("A point name is missing on row " + (k + 1) + "."); });
+    var out = [{ pt: rows[0].pt, rise: null, fall: null, raw: L.startRL }];
+    var sBS = 0, sFS = 0, sRise = 0, sFall = 0, setups = 0, setupAt = [0], cum = [0], dist = 0, hasDist = true;
+    if (L.mode === "dh") {
+      for (i = 1; i < n; i++) {
+        var dh = rows[i].dh;
+        if (bad(dh)) throw new Error("The height difference to " + rows[i].pt + " is missing or could not be read.");
+        out.push({ pt: rows[i].pt, rise: dh > 0 ? dh : null, fall: dh < 0 ? -dh : null, raw: out[i - 1].raw + dh });
+        if (dh > 0) sRise += dh; else sFall -= dh;
+        setups++; setupAt.push(setups);
+      }
+    } else {
+      if (bad(rows[0].bs)) throw new Error("The first row needs a backsight on the benchmark.");
+      var last = rows[0].bs; sBS += rows[0].bs; setups = 1;
+      for (i = 1; i < n; i++) {
+        var r = rows[i], hasIS = !bad(r.is), hasFS = !bad(r.fs), hasBS = !bad(r.bs);
+        if (hasIS && hasFS) throw new Error("Row " + (i + 1) + " (" + r.pt + ") has both an intermediate sight and a foresight. Keep one.");
+        if (!hasIS && !hasFS) throw new Error("Row " + (i + 1) + " (" + r.pt + ") needs an intermediate sight or a foresight.");
+        if (hasBS && !hasFS) throw new Error("Row " + (i + 1) + " (" + r.pt + ") has a backsight but no foresight. A change point needs both.");
+        var cur = hasIS ? r.is : r.fs, rf = last - cur;
+        out.push({ pt: r.pt, rise: rf > 0 ? rf : null, fall: rf < 0 ? -rf : null, raw: out[i - 1].raw + rf });
+        if (rf > 0) sRise += rf; else sFall -= rf;
+        if (hasFS) sFS += r.fs;
+        setupAt.push(setups);
+        if (hasBS) { sBS += r.bs; last = r.bs; setups++; } else last = cur;
+        if (i === n - 1 && !hasFS) throw new Error("The last row must be a foresight, on the closing benchmark or the last point.");
+        if (i === n - 1 && hasBS) warnings.push("The last row also has a backsight; it is not used.");
+      }
+    }
+    for (i = 1; i < n; i++) {
+      var dv = rows[i].dist;
+      if (bad(dv) || dv < 0) { hasDist = false; dv = 0; }
+      dist += dv; cum.push(dist);
+    }
+    if (!(dist > 0)) hasDist = false;
+    var lastRaw = out[n - 1].raw, closed = !bad(L.closeRL);
+    var mis = closed ? lastRaw - L.closeRL : null;
+    var spread = L.spread === "setups" || !hasDist ? "setups" : "dist";
+    if (closed && L.spread !== "setups" && !hasDist) warnings.push("Not every row has a distance, so the misclosure is spread by set-ups instead.");
+    var km = hasDist ? dist / 1000 : null;
+    /* without distances the allowable falls back on the set-up count: C x root(n) */
+    var allow = closed ? (km !== null ? L.C * Math.sqrt(km) : L.C * Math.sqrt(Math.max(setups, 1))) / 1000 : null;
+    var totalW = spread === "dist" ? dist : setupAt[n - 1];
+    out.forEach(function (o, k) {
+      var w = spread === "dist" ? cum[k] : setupAt[k];
+      o.corr = closed && totalW > 0 ? -mis * w / totalW : 0;
+      o.rl = o.raw + o.corr;
+      o.cum = hasDist ? cum[k] : null;
+    });
+    if (closed) out[n - 1].rl = L.closeRL;
+    if (!closed) warnings.push("No closing benchmark, so the run has no check and a misread staff cannot be found.");
+    return {
+      rows: out, mode: L.mode, closed: closed, mis: mis, allow: allow,
+      pass: closed ? Math.abs(mis) <= allow + 1e-12 : null,
+      dist: hasDist ? dist : null, km: km, setups: setups, spread: spread, C: L.C,
+      sBS: sBS, sFS: sFS, sRise: sRise, sFall: sFall,
+      arith: L.mode === "staff" ? Math.abs((sBS - sFS) - (sRise - sFall)) < 1e-9 && Math.abs((sRise - sFall) - (lastRaw - L.startRL)) < 1e-9 : null,
+      warnings: warnings
+    };
+  }
+
+  return {
+    parseAngle: parseAngle, fmtDMS: fmtDMS, fmtSec: fmtSec, azimuth: azimuth, dist2D: dist2D,
+    n360: n360, n180: n180, compute: compute, levels: levels, chi2inv: chi2inv
+  };
+})();
+/* ENGINE END */
+</script>
+<script>
+/* ================= Traverse Pro: the page =================
+   Step 1 lists the field book, one set-up per row; step 2 closes the traverse and adjusts it
+   with the engine above (SURV.compute). The work is kept in this window's storage. */
+(function () {
+  "use strict";
+  var KEY = "traverse-pro.v1";
+  var DEF_TOL = { primary: { angK: 5, ratio: 20000, hC: 8 }, secondary: { angK: 10, ratio: 10000, hC: 12 }, tertiary: { angK: 20, ratio: 5000, hC: 24 } };
+  var METHOD = { bowditch: "Compass (Bowditch)", transit: "Transit", lsq: "Least squares" };
+  var TYPE = { loop: "Closed loop", link: "Closed link", open: "Open" };
+  var SIDE = "Side shot", TRAV = "Traverse";
+
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) {
+    return String(s === null || s === undefined ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  var tn = function (v) {
+    if (v === null || v === undefined) return null;
+    var s = String(v).replace(/[,\s]/g, "");
+    if (s === "") return null;
+    return /^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(s) ? Number(s) : NaN;
+  };
+  var ok = function (v) { return v !== null && v !== undefined && !isNaN(v); };
+  var f = function (v, dp) { return ok(v) && isFinite(v) ? Number(v).toFixed(dp) : "—"; };
+  var fc = function (v, dp) {
+    if (!ok(v) || !isFinite(v)) return "—";
+    var s = Number(v).toFixed(dp).split(".");
+    return s[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",") + (s[1] ? "." + s[1] : "");
+  };
+  var dms = function (v) { return ok(v) ? SURV.fmtDMS(v, 1) : "—"; };
+  var ratioTx = function (r) { return r === Infinity ? "exact" : ok(r) ? "1 : " + fc(Math.floor(r), 0) : "—"; };
+  var mm = function (v) { return ok(v) ? (v * 1000).toFixed(1) + " mm" : "—"; };
+
+  /* ---------- the job ---------- */
+  function blankState() {
+    return {
+      v: 1, job: "New traverse", fmt: "dms", angleDir: "cw", type: "loop", method: "bowditch", scale: "1.00000000",
+      cls: "secondary", tol: { angK: 10, ratio: 10000, hC: 12 }, sigma: { ang: 3, dA: 2, dB: 2 }, useH: false,
+      station: "A", startE: "2500.000", startN: "4800.000", startH: "",
+      bsMode: "bearing", backsight: "BS1", bsE: "", bsN: "", bsBrg: "0.0000",
+      closePoint: "", closeE: "", closeN: "", closeH: "",
+      closeMode: "point", fsName: "", fsE: "", fsN: "", fsBrg: "", closeAngle: "",
+      rows: [], adjusted: null
+    };
+  }
+  /* a primary loop on two pillars, levelled, with two side shots */
+  function sampleState() {
+    var s = blankState();
+    var t = function (a, d, h, name, desc) { return { side: TRAV, angle: a, distance: d, dh: h, name: name, desc: desc || "" }; };
+    var ss = function (a, d, h, name, desc) { return { side: SIDE, angle: a, distance: d, dh: h, name: name, desc: desc || "" }; };
+    s.job = "Site control loop"; s.cls = "primary"; s.tol = { angK: 5, ratio: 20000, hC: 8 }; s.useH = true;
+    s.station = "CP-01"; s.startE = "228450.312"; s.startN = "441203.845"; s.startH = "4.215";
+    s.bsMode = "point"; s.backsight = "CP-02"; s.bsE = "228912.640"; s.bsN = "441655.118"; s.bsBrg = "";
+    s.closeMode = "point"; s.closeAngle = "23.1021";
+    s.rows = [
+      t("81.3127", "316.630", "0.646", "TS-01", "Nail in kerb"),
+      ss("312.4500", "42.315", "-0.212", "MH-01", "Manhole cover"),
+      t("124.3129", "308.240", "0.584", "TS-02", ""),
+      t("125.5354", "308.364", "0.566", "TS-03", ""),
+      ss("201.1530", "27.904", "0.118", "LP-01", "Lamp post"),
+      t("104.5917", "293.903", "-0.802", "TS-04", ""),
+      t("129.2554", "294.528", "-0.478", "TS-05", ""),
+      t("130.2740", "288.697", "-0.523", "CP-01", "Close")
+    ];
+    return s;
+  }
+  function load() {
+    try {
+      var s = JSON.parse(localStorage.getItem(KEY) || "null");
+      if (s && s.v === 1 && Array.isArray(s.rows)) return Object.assign(blankState(), s);
+    } catch (e) { }
+    return null;
+  }
+  var S = load() || sampleState();
+  var saveT = 0;
+  function save() {
+    clearTimeout(saveT);
+    saveT = setTimeout(function () { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { } }, 250);
+  }
+  function getPath(p) { var o = S, a = p.split("."); for (var i = 0; i < a.length; i++) { if (o == null) return undefined; o = o[a[i]]; } return o; }
+  function setPath(p, v) { var o = S, a = p.split("."); for (var i = 0; i < a.length - 1; i++) o = o[a[i]]; o[a[a.length - 1]] = v; }
+
+  /* ---------- the model: who stands where ---------- */
+  var closed = function () { return S.type !== "open"; };
+  var closeName = function () { return S.type === "loop" ? String(S.station || "").trim() : S.type === "link" ? String(S.closePoint || "").trim() : ""; };
+  var bsLabel = function () { return S.bsMode === "point" ? String(S.backsight || "").trim() || "BS" : "Brg " + (S.bsBrg || "?"); };
+  function travRows() { return S.rows.filter(function (r) { return r.side !== SIDE; }); }
+  /* station names along the traverse, and for every row the set-up it belongs to */
+  function layout() {
+    var tr = travRows(), names = [String(S.station || "").trim()];
+    tr.forEach(function (r, k) { names.push(closed() && k === tr.length - 1 ? closeName() : String(r.name || "").trim()); });
+    var ti = -1;
+    var info = S.rows.map(function (r) {
+      if (r.side !== SIDE) {
+        ti++;
+        return { kind: "t", k: ti, station: names[ti], bs: ti === 0 ? bsLabel() : names[ti - 1], to: names[ti + 1], closing: closed() && ti === tr.length - 1 };
+      }
+      var k = Math.max(ti, 0);
+      return { kind: "s", k: k, station: names[k], bs: k === 0 ? bsLabel() : names[k - 1], to: String(r.name || "").trim() };
+    });
+    return { tr: tr, names: names, info: info };
+  }
+  function pt(name, E, N, H) { E = tn(E); N = tn(N); H = tn(H); return ok(E) && ok(N) ? { name: name, E: E, N: N, H: ok(H) ? H : null } : null; }
+  var startPt = function () { return pt(String(S.station || "").trim(), S.startE, S.startN, S.startH); };
+  var bsPt = function () { return S.bsMode === "point" ? pt(String(S.backsight || "").trim(), S.bsE, S.bsN) : null; };
+  var endPt = function () { return S.type === "loop" ? startPt() : S.type === "link" ? pt(closeName(), S.closeE, S.closeN, S.closeH) : null; };
+  var fsPt = function () { return S.type === "link" && S.closeMode === "point" ? pt(String(S.fsName || "").trim(), S.fsE, S.fsN) : null; };
+  function startAz() {
+    if (S.bsMode === "point") {
+      var a = startPt(), b = bsPt();
+      return a && b && (a.E !== b.E || a.N !== b.N) ? SURV.azimuth(a.E, a.N, b.E, b.N) : null;
+    }
+    var v = SURV.parseAngle(S.bsBrg, S.fmt);
+    return ok(v) ? SURV.n360(v) : null;
+  }
+  function endAz() {
+    if (!closed() || S.closeMode === "none") return null;
+    if (S.closeMode === "bearing") { var v = SURV.parseAngle(S.fsBrg, S.fmt); return ok(v) ? SURV.n360(v) : null; }
+    if (S.type === "loop") return startAz();
+    var e = endPt(), q = fsPt();
+    return e && q && (e.E !== q.E || e.N !== q.N) ? SURV.azimuth(e.E, e.N, q.E, q.N) : null;
+  }
+  var scale = function () { var s = tn(S.scale); return ok(s) && s > 0 ? s : 1; };
+  /* an angle as the field book has it, clockwise from the backsight */
+  function obsAngle(raw) {
+    var a = SURV.parseAngle(raw, S.fmt);
+    if (!ok(a)) return null;
+    return S.angleDir === "ccw" ? SURV.n360(360 - a) : SURV.n360(a);
+  }
+  /* an angle in degrees, written the way angles are typed in this job */
+  function angleText(deg) {
+    deg = SURV.n360(deg);
+    if (S.angleDir === "ccw") deg = SURV.n360(360 - deg);
+    if (S.fmt === "deg") return deg.toFixed(6);
+    if (S.fmt === "gon") return (deg / 0.9).toFixed(5);
+    var t = Math.round(deg * 36000), d = Math.floor(t / 36000); t -= d * 36000;
+    var m = Math.floor(t / 600); t -= m * 600;
+    var s = Math.floor(t / 10), ds = t - s * 10;
+    return d + "." + (m < 10 ? "0" : "") + m + (s < 10 ? "0" : "") + s + ds;
+  }
+
+  /* the engine's input, or a plain message saying what is missing */
+  function engineInput() {
+    var L = layout(), sp = startPt(), saz = startAz();
+    if (!L.names[0]) throw new Error("Type the name of the start station.");
+    if (!sp) throw new Error("Type the start station's Easting and Northing.");
+    if (saz === null) {
+      if (S.bsMode === "bearing") throw new Error("Type the backsight bearing, or switch the orientation to a backsight point.");
+      if (!bsPt()) throw new Error("Type the backsight point's Easting and Northing, or switch the orientation to a bearing.");
+      throw new Error("The backsight must be a different point from the start station.");
+    }
+    var ep = null, endOri = { mode: "none" };
+    if (S.type === "link") {
+      if (!closeName()) throw new Error("Type the name of the close point.");
+      ep = endPt();
+      if (!ep) throw new Error("Type the close point's Easting and Northing.");
+    }
+    if (closed() && S.closeMode !== "none") {
+      var ea = endAz();
+      if (ea === null) {
+        if (S.closeMode === "bearing") throw new Error("Type the closing foresight bearing, or set the closing orientation to None.");
+        throw new Error("Type the foresight point's name, Easting and Northing, or set the closing orientation to None.");
+      }
+      if (String(S.closeAngle || "").trim() === "") throw new Error("Type the closing angle at " + (closeName() || "the close point") + " (under Close), or set the closing orientation to None.");
+      endOri = { mode: S.closeMode, az: ea };
+    }
+    if (L.tr.length < 1) throw new Error("Add the first traverse row.");
+    if (closed() && L.tr.length < 2) throw new Error("A closed traverse needs at least two legs.");
+    var n = L.names.length;
+    var rows = L.names.map(function (nm, i) {
+      if (i < n - 1) {
+        var r = L.tr[i];
+        return { name: nm, angle: SURV.parseAngle(r.angle, S.fmt), dist: tn(r.distance), dh: tn(r.dh) };
+      }
+      return { name: nm, angle: endOri.mode !== "none" ? SURV.parseAngle(S.closeAngle, S.fmt) : null, dist: null, dh: null };
+    });
+    return {
+      type: S.type, method: S.method, angleDir: S.angleDir, scale: tn(S.scale),
+      tol: { angK: +S.tol.angK || 0, ratio: +S.tol.ratio || 0, hC: +S.tol.hC || 0 },
+      sigma: { ang: +S.sigma.ang || 1, dA: +S.sigma.dA || 1, dB: +S.sigma.dB || 0 }, useH: !!S.useH,
+      startPt: sp, endPt: ep, startOri: { mode: S.bsMode, az: saz }, endOri: endOri, rows: rows
+    };
+  }
+  var RUN = null;
+  function run() {
+    if (RUN) return RUN;
+    try { var inp = engineInput(); RUN = { ok: true, inp: inp, res: SURV.compute(inp) }; }
+    catch (e) { RUN = { ok: false, error: e.message }; }
+    return RUN;
+  }
+  function status(R) {
+    if (!R.ok) return "err";
+    if (!R.res.closed) return "open";
+    var c = R.res.closure;
+    var checks = [c.angPass, c.precPass, c.hPass, R.res.lsq && R.res.lsq.chi ? R.res.lsq.chi.pass : null].filter(function (v) { return v !== null; });
+    return checks.every(Boolean) ? "pass" : "fail";
+  }
+
+  /* the stations as observed, before any adjustment, as far as the rows go */
+  function provisional() {
+    var L = layout(), sp = startPt(), saz = startAz(), sc = scale(), st = [];
+    if (sp && saz !== null) {
+      st.push({ name: L.names[0], E: sp.E, N: sp.N, H: sp.H, bsAz: saz });
+      for (var k = 0; k < L.tr.length; k++) {
+        var a = obsAngle(L.tr[k].angle), d = tn(L.tr[k].distance), dh = tn(L.tr[k].dh), p = st[k];
+        if (a === null || !ok(d) || d <= 0) break;
+        var az = SURV.n360(p.bsAz + a);
+        st.push({
+          name: L.names[k + 1], E: p.E + d * sc * Math.sin(az * Math.PI / 180), N: p.N + d * sc * Math.cos(az * Math.PI / 180),
+          H: S.useH && ok(p.H) && ok(dh) ? p.H + dh : null, bsAz: SURV.n360(az + 180)
+        });
+      }
+    }
+    return { L: L, st: st };
+  }
+  /* the adjusted stations, each with the bearing back to its backsight */
+  function adjustedStations(R) {
+    var s = R.res.stations;
+    return s.map(function (x, k) {
+      return { name: x.name, E: x.E, N: x.N, H: x.H, bsAz: k === 0 ? R.inp.startOri.az : SURV.azimuth(x.E, x.N, s[k - 1].E, s[k - 1].N) };
+    });
+  }
+  /* side shots radiate from their set-up; they are never adjusted themselves */
+  function sideShots(L, st) {
+    var out = [];
+    S.rows.forEach(function (r, i) {
+      var inf = L.info[i];
+      if (inf.kind !== "s") return;
+      var p = st[inf.k], a = obsAngle(r.angle), d = tn(r.distance), dh = tn(r.dh), o = { i: i, name: inf.to, from: inf.station, desc: r.desc || "", E: null, N: null, H: null };
+      if (p && a !== null && ok(d) && d > 0) {
+        var az = SURV.n360(p.bsAz + a);
+        o.E = p.E + d * scale() * Math.sin(az * Math.PI / 180); o.N = p.N + d * scale() * Math.cos(az * Math.PI / 180);
+        o.H = S.useH && ok(p.H) && ok(dh) ? p.H + dh : null; o.az = az; o.d = d;
+      }
+      out.push(o);
+    });
+    return out;
+  }
+  /* what step 1 shows: the applied adjustment while it still stands, else the stations as observed */
+  function shownStations() {
+    if (S.adjusted) { var R = run(); if (R.ok) return { st: adjustedStations(R), adj: true }; }
+    return { st: provisional().st, adj: false };
+  }
+
+  /* ---------- every change goes through here ---------- */
+  function changed(structural) {
+    RUN = null;
+    S.adjusted = null;
+    save();
+    if (structural) renderAll(); else refresh();
+  }
+
+  /* ---------- step 1: setup ---------- */
+  function renderSetup() {
+    document.querySelectorAll("[data-s]").forEach(function (el) {
+      var v = getPath(el.dataset.s);
+      if (el.type === "checkbox") el.checked = !!v;
+      else if (document.activeElement !== el) el.value = v === undefined || v === null ? "" : v;
+    });
+    $("job").value = S.job || "";
+    var show = function (sel, on) { document.querySelectorAll(sel).forEach(function (el) { el.style.display = on ? "" : "none"; }); };
+    show(".bs-pt", S.bsMode === "point");
+    show(".bs-brg", S.bsMode === "bearing");
+    show(".cl-link", S.type === "link");
+    show(".cl-closed", closed());
+    show(".fs-pt", S.type === "link" && S.closeMode === "point");
+    show(".fs-brg", closed() && S.closeMode === "bearing");
+    show(".fs-ang", closed() && S.closeMode !== "none");
+    show(".lv", !!S.useH);
+    $("closePointOpt").textContent = S.type === "loop" ? "Back onto the backsight" : "Foresight point";
+    var cp = $("closePoint");
+    cp.readOnly = S.type !== "link";
+    if (S.type === "loop") cp.value = S.station; else if (S.type === "open") cp.value = "(open)";
+    cp.title = S.type === "loop" ? "A loop closes on its start station" : S.type === "open" ? "An open traverse does not close" : "";
+    $("sigmaBox").style.display = S.method === "lsq" ? "" : "none";
+    $("method").value = S.method;
+  }
+  function onSetup(el) {
+    var p = el.dataset.s, v = el.type === "checkbox" ? el.checked : el.value;
+    if (p === "cls") {
+      S.cls = v;
+      if (DEF_TOL[v]) S.tol = Object.assign({}, DEF_TOL[v]);
+    } else {
+      setPath(p, v);
+      if (/^tol\./.test(p)) S.cls = "custom";
+    }
+    if (el.matches("[data-n]")) el.classList.toggle("bad", ok(tn(v)) ? false : tn(v) !== null);
+    if (el.matches("[data-a]")) el.classList.toggle("bad", String(v).trim() !== "" && !ok(SURV.parseAngle(v, S.fmt)));
+    var structural = el.tagName === "SELECT" || el.type === "checkbox" || p === "station" || p === "closePoint" || p === "backsight";
+    changed(structural);
+  }
+
+  /* ---------- step 1: the list ---------- */
+  function cell(i, k, v, cls, extra) {
+    return '<td><input data-i="' + i + '" data-k="' + k + '" value="' + esc(v) + '"' + (cls ? ' class="' + cls + '"' : "") + (extra || "") + "></td>";
+  }
+  function renderTable() {
+    var L = layout();
+    $("body").innerHTML = S.rows.map(function (r, i) {
+      var inf = L.info[i], side = inf.kind === "s";
+      return '<tr class="' + (side ? "side" : "") + (inf.closing ? " closing" : "") + '" data-row="' + i + '">' +
+        '<td>' + (i + 1) + "</td>" +
+        '<td><select data-i="' + i + '" data-k="side" aria-label="Kind of row ' + (i + 1) + '"><option' + (side ? "" : " selected") + ">" + TRAV + "</option><option" + (side ? " selected" : "") + ">" + SIDE + "</option></select></td>" +
+        '<td class="ro" data-c="station"></td><td class="ro" data-c="bs"></td>' +
+        cell(i, "angle", r.angle, "", ' aria-label="Angle, row ' + (i + 1) + '"') +
+        cell(i, "distance", r.distance, "", ' aria-label="Distance, row ' + (i + 1) + '"') +
+        (S.useH ? cell(i, "dh", r.dh, "", ' aria-label="Height difference, row ' + (i + 1) + '"') : "") +
+        '<td class="ro num" data-c="E"></td><td class="ro num" data-c="N"></td>' + (S.useH ? '<td class="ro num" data-c="H"></td>' : "") +
+        (inf.closing ? '<td class="ro" data-c="to" title="The closing leg ends on the close point"></td>' : cell(i, "name", r.name, "", ' aria-label="Name, row ' + (i + 1) + '"')) +
+        cell(i, "desc", r.desc, "w-desc", ' aria-label="Description, row ' + (i + 1) + '"') +
+        '<td><button class="x" type="button" data-del="' + i + '" title="Remove this row" aria-label="Remove row ' + (i + 1) + '">×</button></td></tr>';
+    }).join("") || '<tr><td colspan="13" class="note">No rows yet. Press <b>Add row</b>, <b>Add point by click</b> and click on the plan, or <b>Load traverse data</b>.</td></tr>';
+    refresh();
+  }
+  /* the worked-out cells only, so typing is never interrupted */
+  function refresh() {
+    var L = layout(), sh = shownStations(), sides = sideShots(L, sh.st), byRow = {};
+    sides.forEach(function (s) { byRow[s.i] = s; });
+    document.querySelectorAll("#body tr[data-row]").forEach(function (tr) {
+      var i = +tr.dataset.row, inf = L.info[i], p = inf.kind === "t" ? sh.st[inf.k + 1] : byRow[i];
+      var set = function (c, v) { var td = tr.querySelector('[data-c="' + c + '"]'); if (td) { td.textContent = v; td.classList.toggle("adj", sh.adj && (c === "E" || c === "N" || c === "H")); } };
+      set("station", inf.station || "—"); set("bs", inf.bs || "—"); set("to", inf.to || "—");
+      set("E", p && ok(p.E) ? f(p.E, 3) : ""); set("N", p && ok(p.N) ? f(p.N, 3) : ""); set("H", p && ok(p.H) ? f(p.H, 3) : "");
+      tr.querySelectorAll("input[data-k]").forEach(function (el) {
+        var k = el.dataset.k, v = el.value;
+        var bad = (k === "angle" && String(v).trim() !== "" && !ok(SURV.parseAngle(v, S.fmt))) ||
+          ((k === "distance" || k === "dh") && tn(v) !== null && !ok(tn(v)));
+        el.classList.toggle("bad", !!bad);
+      });
+    });
+    var nT = L.tr.length, nS = S.rows.length - nT, R = run(), st = status(R);
+    $("ribbonInfo").textContent = nT + " traverse leg" + (nT === 1 ? "" : "s") + " · " + nS + " side shot" + (nS === 1 ? "" : "s") + " · " + TYPE[S.type];
+    var stTx = { pass: "Within tolerance", fail: "Outside tolerance", open: "Open: no check", err: "Not complete: " + (R.error || "") }[st];
+    $("statusTx").textContent = (S.job || "Traverse") + " · " + METHOD[S.method] + " · " + stTx + (sh.adj ? " · adjustment applied" : "");
+    draw($("plan"), false);
+    if (!$("step2").hidden) renderClose();
+  }
+  function onRow(el) {
+    var i = +el.dataset.i, k = el.dataset.k;
+    S.rows[i][k] = el.value;
+    changed(k === "side" || k === "name");
+  }
+  function insertIndex() {
+    /* closed traverses keep the closing leg last: new rows go above it */
+    if (!closed()) return S.rows.length;
+    for (var i = S.rows.length - 1; i >= 0; i--) if (S.rows[i].side !== SIDE) return i;
+    return S.rows.length;
+  }
+  function nextName() {
+    var used = {}, n = 1;
+    S.rows.forEach(function (r) { used[String(r.name || "").trim()] = 1; });
+    used[String(S.station || "").trim()] = 1;
+    while (used["P" + n]) n++;
+    return "P" + n;
+  }
+  function addRow() {
+    var at = insertIndex();
+    S.rows.splice(at, 0, { side: TRAV, angle: "", distance: "", dh: "", name: nextName(), desc: "" });
+    changed(true);
+    var el = document.querySelector('#body input[data-i="' + at + '"][data-k="angle"]');
+    if (el) el.focus();
+  }
+
+  /* ---------- add a station by clicking the plan ---------- */
+  var clickMode = false;
+  function setClickMode(on) {
+    clickMode = on;
+    $("addBtn").classList.toggle("on", on);
+    $("addBtn").setAttribute("aria-pressed", String(on));
+    $("addBtn").textContent = on ? "Adding: click the plan (Esc to stop)" : "Add point by click";
+    $("plan").classList.toggle("clicking", on);
+    draw($("plan"), false);
+  }
+  /* angle and distance from the last station to the clicked spot, worked back from coordinates */
+  function legTo(from, E, N) {
+    var az = SURV.azimuth(from.E, from.N, E, N);
+    return { angle: angleText(az - from.bsAz), distance: (SURV.dist2D(from.E, from.N, E, N) / scale()).toFixed(3), az: az };
+  }
+  function addByClick(E, N) {
+    var pv = provisional(), L = pv.L, st = pv.st;
+    if (!st.length) { toast("Set the start station's coordinates and the backsight first."); return; }
+    var closing = closed() && L.tr.length >= 1;
+    var known = closing ? L.tr.length - 1 : L.tr.length;
+    if (st.length < known + 1) { toast("Finish the angle and distance of every row first: the new point hangs off the last one."); return; }
+    var from = st[known], leg = legTo(from, E, N);
+    var row = { side: TRAV, angle: leg.angle, distance: leg.distance, dh: "", name: nextName(), desc: "Added on the plan" };
+    var at = insertIndex();
+    S.rows.splice(at, 0, row);
+    var note = "Added " + row.name + ".";
+    if (closed()) {
+      var end = endPt();
+      if (end) {
+        /* the closing leg now starts from the new point: measure it on the plan too */
+        var after = { E: E, N: N, bsAz: SURV.n360(leg.az + 180) }, cl = legTo(after, end.E, end.N);
+        var ci = -1;
+        for (var i = S.rows.length - 1; i >= 0; i--) if (S.rows[i].side !== SIDE) { ci = i; break; }
+        if (ci === at) { S.rows.push({ side: TRAV, angle: cl.angle, distance: cl.distance, dh: "", name: closeName(), desc: "Close" }); }
+        else { S.rows[ci].angle = cl.angle; S.rows[ci].distance = cl.distance; }
+        var ea = endAz();
+        if (S.closeMode !== "none" && ea !== null) S.closeAngle = angleText(ea - SURV.n360(cl.az + 180));
+        note += " The closing leg to " + closeName() + " was measured on the plan as well.";
+      }
+    }
+    changed(true);
+    toast(note);
+  }
+
+  /* ---------- the plan ---------- */
+  var VIEW = {};
+  function draw(c, final) {
+    if (!c || c.offsetParent === null) return;
+    var dpr = window.devicePixelRatio || 1, w = c.clientWidth || 800, h = c.clientHeight || 360;
+    if (c.width !== Math.round(w * dpr) || c.height !== Math.round(h * dpr)) { c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); }
+    var g = c.getContext("2d");
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, w, h);
+    var R = run(), st, adj;
+    if (final) { if (!R.ok) return; st = adjustedStations(R); adj = true; }
+    else { var sh = shownStations(); st = sh.st; adj = sh.adj; }
+    var L = layout(), sides = sideShots(L, st).filter(function (s) { return ok(s.E); });
+    var bp = bsPt(), ep = S.type === "link" ? endPt() : null, fp = fsPt();
+    var all = st.concat(sides).concat([bp, ep, fp].filter(Boolean));
+    if (!all.length) {
+      g.fillStyle = "#888"; g.font = "13px Segoe UI"; g.textAlign = "center";
+      g.fillText("Type the start station's Easting and Northing and a backsight to see the plan.", w / 2, h / 2);
+      g.textAlign = "left";
+      return;
+    }
+    var xs = all.map(function (p) { return p.E; }), ys = all.map(function (p) { return p.N; });
+    var minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs), minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
+    /* never closer than 100 m across, so a first click on an empty plan makes a sensible leg */
+    var grow = function (lo, hi, min) { var c = (lo + hi) / 2, half = Math.max(hi - lo, min) / 2; return [c - half, c + half]; };
+    var gx = grow(minX, maxX, 100), gy = grow(minY, maxY, 100);
+    minX = gx[0]; maxX = gx[1]; minY = gy[0]; maxY = gy[1];
+    var pad = 44;
+    var s = Math.min((w - 2 * pad) / (maxX - minX), (h - 2 * pad) / (maxY - minY));
+    var ox = pad + (w - 2 * pad - (maxX - minX) * s) / 2, oy = pad + (h - 2 * pad - (maxY - minY) * s) / 2;
+    var X = function (e) { return ox + (e - minX) * s; }, Y = function (n) { return h - oy - (n - minY) * s; };
+    if (!final) VIEW = { minX: minX, minY: minY, s: s, ox: ox, oy: oy, h: h };
+
+    g.lineCap = "round"; g.lineJoin = "round";
+    /* backsight and foresight rays */
+    g.setLineDash([5, 4]); g.strokeStyle = "#9aa7b4"; g.lineWidth = 1;
+    if (bp && st[0]) { g.beginPath(); g.moveTo(X(st[0].E), Y(st[0].N)); g.lineTo(X(bp.E), Y(bp.N)); g.stroke(); }
+    if (fp && ep) { g.beginPath(); g.moveTo(X(ep.E), Y(ep.N)); g.lineTo(X(fp.E), Y(fp.N)); g.stroke(); }
+    /* side shots */
+    g.strokeStyle = "#c6a15a";
+    sides.forEach(function (p) {
+      var from = st[L.info[p.i].k]; if (!from) return;
+      g.beginPath(); g.moveTo(X(from.E), Y(from.N)); g.lineTo(X(p.E), Y(p.N)); g.stroke();
+    });
+    g.setLineDash([]);
+    /* the traverse */
+    g.strokeStyle = adj ? "#1f6f3f" : "#1e2a38"; g.lineWidth = 2; g.beginPath();
+    st.forEach(function (p, i) { if (i) g.lineTo(X(p.E), Y(p.N)); else g.moveTo(X(p.E), Y(p.N)); });
+    g.stroke();
+    /* misclosure: where the observed traverse ends against where it should */
+    if (!adj && closed() && st.length === L.names.length) {
+      var e2 = endPt(), last = st[st.length - 1];
+      if (e2 && (Math.abs(last.E - e2.E) > 1e-6 || Math.abs(last.N - e2.N) > 1e-6)) {
+        g.strokeStyle = "#c0392b"; g.lineWidth = 1.5; g.beginPath(); g.moveTo(X(last.E), Y(last.N)); g.lineTo(X(e2.E), Y(e2.N)); g.stroke();
+      }
+    }
+    g.font = "12px Segoe UI";
+    var label = function (p, tx, col) { g.fillStyle = col; g.fillText(tx, X(p.E) + 7, Y(p.N) - 7); };
+    var tri = function (p, col) {
+      g.fillStyle = col; g.beginPath(); g.moveTo(X(p.E), Y(p.N) - 7); g.lineTo(X(p.E) + 6, Y(p.N) + 5); g.lineTo(X(p.E) - 6, Y(p.N) + 5); g.closePath(); g.fill();
+    };
+    [bp, fp].forEach(function (p) { if (p) { tri(p, "#6b7785"); label(p, p.name || "BS", "#6b7785"); } });
+    if (ep) { tri(ep, "#c6a15a"); label(ep, ep.name, "#1e2a38"); }
+    sides.forEach(function (p) { g.fillStyle = "#b07d22"; g.beginPath(); g.arc(X(p.E), Y(p.N), 2.6, 0, 6.283); g.fill(); label(p, p.name, "#8a6418"); });
+    st.forEach(function (p, i) {
+      if (i === 0) tri(p, "#c6a15a");
+      else { g.fillStyle = adj ? "#1f6f3f" : "#1e2a38"; g.beginPath(); g.arc(X(p.E), Y(p.N), 3.4, 0, 6.283); g.fill(); }
+      if (!(closed() && S.type === "loop" && i === st.length - 1 && st.length > 1)) label(p, p.name || "?", "#1e2a38");
+    });
+    /* north arrow and a scale bar */
+    g.fillStyle = "#1e2a38"; g.strokeStyle = "#1e2a38"; g.lineWidth = 1.5;
+    g.beginPath(); g.moveTo(w - 24, 14); g.lineTo(w - 30, 32); g.lineTo(w - 24, 28); g.lineTo(w - 18, 32); g.closePath(); g.fill();
+    g.font = "bold 11px Segoe UI"; g.textAlign = "center"; g.fillText("N", w - 24, 46);
+    var target = 120 / s, pow = Math.pow(10, Math.floor(Math.log10(target))), step = [1, 2, 5, 10].map(function (k) { return k * pow; }).filter(function (k) { return k <= target; }).pop() || pow;
+    var bw = step * s;
+    g.lineWidth = 2; g.beginPath(); g.moveTo(14, h - 14); g.lineTo(14 + bw, h - 14); g.moveTo(14, h - 18); g.lineTo(14, h - 10); g.moveTo(14 + bw, h - 18); g.lineTo(14 + bw, h - 10); g.stroke();
+    g.font = "11px Segoe UI"; g.fillText((step >= 1 ? step : step.toPrecision(1)) + " m", 14 + bw / 2, h - 20);
+    g.textAlign = "left";
+    if (adj) { g.fillStyle = "#1f6f3f"; g.fillText(final ? "Adjusted: " + METHOD[S.method] : "Adjusted coordinates", 12, 18); }
+    else if (clickMode) { g.fillStyle = "#8a6418"; g.fillText("Click to add a station", 12, 18); }
+  }
+  function planPoint(ev) {
+    var c = $("plan"), r = c.getBoundingClientRect(), x = ev.clientX - r.left, y = ev.clientY - r.top;
+    if (!VIEW.s) return null;
+    return { E: VIEW.minX + (x - VIEW.ox) / VIEW.s, N: VIEW.minY + (VIEW.h - VIEW.oy - y) / VIEW.s };
+  }
+
+  /* ---------- step 2: close and adjust ---------- */
+  function renderClose() {
+    renderSetup();
+    $("station2").value = S.station;
+    $("backsight2").value = bsLabel();
+    $("closePoint2").value = closed() ? closeName() : "(open)";
+    var R = run();
+    $("closeErr").hidden = R.ok;
+    $("closeOut").style.display = R.ok ? "" : "none";
+    $("applyBtn").disabled = !R.ok;
+    if (!R.ok) { $("closeErr").innerHTML = "<b>Not ready to close.</b> " + esc(R.error) + ' <a href="#" id="toList">Back to the list</a>'; $("toList").onclick = function (e) { e.preventDefault(); show(1); }; return; }
+    var r = R.res, c = r.closure, n = r.names.length, Ef = r.finalE, Nf = r.finalN;
+    var area = null;
+    if (S.type === "loop" && n >= 4) {
+      var a = 0;
+      for (var i = 0; i < n - 1; i++) { var j = (i + 1) % (n - 1); a += Ef[i] * Nf[j] - Ef[j] * Nf[i]; }
+      area = Math.abs(a) / 2;
+    }
+    var errDir = r.closed && c.fL > 0 ? SURV.azimuth(0, 0, c.fE, c.fN) : null;
+    $("summary").innerHTML = "<tr><td>" + esc(S.station + " to " + (closed() ? closeName() : r.names[n - 1])) + "</td><td>" + (r.closed ? ratioTx(c.precision) : "—") +
+      '</td><td class="num">' + (r.closed ? f(c.fL, 4) : "—") + "</td><td>" + (errDir !== null ? dms(errDir) : "—") +
+      '</td><td class="num">' + (r.closed ? f(c.fE, 4) : "—") + '</td><td class="num">' + (r.closed ? f(c.fN, 4) : "—") +
+      '</td><td class="num">' + (area !== null ? fc(area, 3) + " m² (" + f(area / 10000, 4) + " ha)" : "—") + '</td><td class="num">' + fc(c.sumD, 3) + "</td></tr>";
+
+    var badge = function (p) { return p === null ? '<span class="badge na">No check</span>' : p ? '<span class="badge pass">Pass</span>' : '<span class="badge fail">Fail</span>'; };
+    var ch = [];
+    ch.push(["Angular misclosure (" + c.nAng + " angles)", c.hasClose ? SURV.fmtSec(c.angMis, 1) + " (" + SURV.fmtSec(c.angCorr, 2) + " each)" : r.closed ? "no closing orientation" : "open traverse", c.hasClose ? "±" + c.angAllow.toFixed(1) + '"' : "—", badge(c.angPass)]);
+    ch.push(["Linear precision", r.closed ? ratioTx(c.precision) + " (" + mm(c.fL) + ")" : "open traverse", r.closed ? "1 : " + fc(c.ratioReq, 0) : "—", badge(c.precPass)]);
+    if (S.useH) ch.push(["Level misclosure", c.fH !== null ? mm(c.fH) : r.H ? "open traverse" : "levels left out", c.hAllow !== null ? "±" + mm(c.hAllow) : "—", badge(c.hPass)]);
+    if (r.lsq && r.lsq.chi) ch.push(["Chi-square test (95%)", r.lsq.chi.value.toFixed(2), r.lsq.chi.lo.toFixed(2) + " to " + r.lsq.chi.hi.toFixed(2), badge(r.lsq.chi.pass)]);
+    var stt = status(R);
+    ch.push(["<b>Result</b>", "", "", stt === "pass" ? '<span class="badge pass">Within tolerance</span>' : stt === "fail" ? '<span class="badge fail">Outside tolerance</span>' : '<span class="badge na">No check</span>']);
+    $("checks").innerHTML = ch.map(function (x) { return "<tr><td>" + x[0] + "</td><td>" + esc(x[1]) + "</td><td>" + esc(x[2]) + "</td><td>" + x[3] + "</td></tr>"; }).join("");
+
+    var q = r.lsq;
+    $("lsqBox").innerHTML = q ? "<h2>Least squares</h2><table><thead><tr><th>Observations</th><th>Unknowns</th><th>Redundancy</th><th>Iterations</th><th>Std. error of unit weight</th></tr></thead><tbody><tr><td>" +
+      q.m + "</td><td>" + q.u + "</td><td>" + q.r + "</td><td>" + q.iter + "</td><td>" + q.s0.toFixed(3) + "</td></tr></tbody></table>" +
+      '<h2>Observations and residuals</h2><div class="table-wrap"><table><thead><tr><th>Observation</th><th>At</th><th>To</th><th>Observed</th><th>Adjusted</th><th>Residual</th><th>σ</th><th>Standardised</th></tr></thead><tbody>' +
+      q.obs.map(function (o) {
+        var isD = o.unit === "m";
+        return "<tr><td>" + esc(o.label) + "</td><td>" + esc(o.at) + "</td><td>" + esc(o.to) + '</td><td class="num">' + (isD ? f(o.obs, 4) : dms(o.obs)) + '</td><td class="num">' + (isD ? f(o.adj, 4) : dms(o.adj)) +
+          '</td><td class="num">' + (isD ? mm(o.v) : SURV.fmtSec(o.v, 2)) + '</td><td class="num">' + (isD ? mm(o.sigma) : o.sigma.toFixed(1) + '"') +
+          '</td><td class="num' + (o.flag ? " flag" : "") + '">' + (o.std === null ? "—" : o.std.toFixed(2) + (o.flag ? " check" : "")) + "</td></tr>";
+      }).join("") + "</tbody></table></div>" : "";
+
+    var H = r.H;
+    $("adjHead").innerHTML = "<tr><th>Station</th><th>To</th><th>Easting</th><th>Northing</th>" + (H ? "<th>Level</th>" : "") + "<th>Bearing</th><th>Distance</th><th>ΔE</th><th>ΔN</th><th>Corr E</th><th>Corr N</th>" +
+      (q ? "<th>σE</th><th>σN</th><th>95% ellipse</th>" : "") + "</tr>";
+    var rowsH = ['<tr class="fixed"><td>' + esc(bsLabel()) + "</td><td>" + esc(r.names[0]) + '</td><td class="num">' + f(Ef[0], 3) + '</td><td class="num">' + f(Nf[0], 3) + "</td>" +
+      (H ? '<td class="num">' + f(H[0], 3) + "</td>" : "") + '<td colspan="' + (6 + (q ? 3 : 0)) + '">start station, fixed</td></tr>'];
+    r.adjLegs.forEach(function (lg, k) {
+      var dE = Ef[k + 1] - Ef[k], dN = Nf[k + 1] - Nf[k], st = r.stations[k + 1];
+      rowsH.push("<tr><td>" + esc(lg.from) + "</td><td>" + esc(lg.to) + (st.fixed ? " (fixed)" : "") + '</td><td class="num">' + f(Ef[k + 1], 3) + '</td><td class="num">' + f(Nf[k + 1], 3) + "</td>" +
+        (H ? '<td class="num">' + f(H[k + 1], 3) + "</td>" : "") + "<td>" + dms(lg.az) + '</td><td class="num">' + f(lg.d, 3) + '</td><td class="num">' + f(dE, 3) + '</td><td class="num">' + f(dN, 3) +
+        '</td><td class="num">' + f(dE - r.dE[k], 4) + '</td><td class="num">' + f(dN - r.dN[k], 4) + "</td>" +
+        (q ? '<td class="num">' + (ok(st.sE) ? mm(st.sE) : "—") + '</td><td class="num">' + (ok(st.sN) ? mm(st.sN) : "—") + "</td><td>" + (ok(st.ellA) ? mm(st.ellA) + " × " + mm(st.ellB) + " @ " + st.ellAz.toFixed(0) + "°" : "—") + "</td>" : "") + "</tr>");
+    });
+    $("adj").innerHTML = rowsH.join("");
+
+    $("angles").innerHTML = r.rows.map(function (x, k) {
+      if (x.obs === null) return "";
+      var bsN = k === 0 ? bsLabel() : r.names[k - 1], fsN = k < n - 1 ? r.names[k + 1] : (S.closeMode === "bearing" ? "Brg " + S.fsBrg : S.type === "loop" ? bsLabel() : S.fsName);
+      var corr = SURV.n180(r.adjAng[k] - x.obs) * 3600;
+      return "<tr><td>" + esc(x.name) + (k === n - 1 ? " (closing)" : "") + "</td><td>" + esc(bsN) + "</td><td>" + esc(fsN) + "</td><td>" + dms(x.obs) + "</td><td>" + SURV.fmtSec(corr, 2) + "</td><td>" + dms(r.adjAng[k]) + "</td></tr>";
+    }).join("");
+
+    var sides = sideShots(layout(), adjustedStations(R));
+    $("sideBox").innerHTML = sides.length ? '<h2>Side shots, from the adjusted stations</h2><div class="table-wrap"><table><thead><tr><th>Name</th><th>From</th><th>Bearing</th><th>Distance</th><th>Easting</th><th>Northing</th>' +
+      (S.useH ? "<th>Level</th>" : "") + "<th>Description</th></tr></thead><tbody>" + sides.map(function (s) {
+        return "<tr><td>" + esc(s.name) + "</td><td>" + esc(s.from) + "</td><td>" + (ok(s.az) ? dms(s.az) : "—") + '</td><td class="num">' + (ok(s.d) ? f(s.d * scale(), 3) : "—") +
+          '</td><td class="num">' + (ok(s.E) ? f(s.E, 3) : "—") + '</td><td class="num">' + (ok(s.N) ? f(s.N, 3) : "—") + "</td>" + (S.useH ? '<td class="num">' + (ok(s.H) ? f(s.H, 3) : "—") + "</td>" : "") + "<td>" + esc(s.desc) + "</td></tr>";
+      }).join("") + "</tbody></table></div>" : "";
+    $("warnBox").innerHTML = r.warnings.map(function (w) { return "<li>" + esc(w) + "</li>"; }).join("");
+    var c2 = $("plan2"); c2.style.height = "320px"; draw(c2, true);
+  }
+  function apply() {
+    var R = run();
+    if (!R.ok) return;
+    if (status(R) === "fail" && !confirm("This traverse is outside tolerance. Apply the adjustment anyway?")) return;
+    RUN = R;
+    S.adjusted = { method: S.method, at: new Date().toISOString() };
+    save();
+    renderAll();
+    $("msg").textContent = "Closed by " + METHOD[S.method] + ". The adjusted Easting and Northing are now shown in the list. Your observations are unchanged.";
+  }
+
+  /* ---------- files ---------- */
+  function fileBase() { return String(S.job || "traverse").replace(/[\\/:*?"<>|]/g, "-").trim() || "traverse"; }
+  function b64(text) {
+    var bytes = new TextEncoder().encode(text), s = "";
+    for (var i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+    return btoa(s);
+  }
+  /* the Windows program saves through its own Save As window; a browser downloads */
+  function saveFile(text, name, mime) {
+    if (window.traverseSave) {
+      window.traverseSave(name, b64(text)).then(function (path) {
+        toast(path ? "Saved: " + path : "Save cancelled. Nothing was written.");
+      }).catch(function (e) { download(text, name, mime); toast("Saved to Downloads: " + (e && e.message || e)); });
+      return;
+    }
+    download(text, name, mime);
+  }
+  function download(text, name, mime) {
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([text], { type: mime }));
+    a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+  }
+  var csvCell = function (v) { v = v === null || v === undefined ? "" : String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+  function coordsCsv() {
+    var R = run(), st, how;
+    if (R.ok) { st = adjustedStations(R); how = METHOD[S.method]; }
+    else { st = provisional().st; how = "not adjusted"; }
+    var L = layout(), lines = [["Name", "Easting", "Northing", "Level", "Kind", "Description"].join(",")];
+    var descOf = {};
+    S.rows.forEach(function (r, i) { if (L.info[i].kind === "t") descOf[L.info[i].to] = r.desc; });
+    st.forEach(function (p, i) {
+      if (i > 0 && S.type === "loop" && i === st.length - 1 && L.names.length === st.length) return;
+      lines.push([p.name, f(p.E, 3), f(p.N, 3), ok(p.H) ? f(p.H, 3) : "", i === 0 ? "Start" : "Station", descOf[p.name] || ""].map(csvCell).join(","));
+    });
+    sideShots(L, st).forEach(function (s) { if (ok(s.E)) lines.push([s.name, f(s.E, 3), f(s.N, 3), ok(s.H) ? f(s.H, 3) : "", "Side shot", s.desc].map(csvCell).join(",")); });
+    saveFile("﻿" + lines.join("\r\n") + "\r\n", fileBase() + " coordinates.csv", "text/csv;charset=utf-8");
+    if (!R.ok) toast("Not adjusted yet (" + R.error + "). The coordinates are as observed.");
+  }
+  function saveJob() { saveFile(JSON.stringify(Object.assign({ app: "Traverse Pro" }, S), null, 2), fileBase() + ".json", "application/json"); }
+
+  function splitLine(line, d) {
+    var out = [], cur = "", q = false;
+    for (var i = 0; i < line.length; i++) {
+      var ch = line[i];
+      if (q) { if (ch === '"') { if (line[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += ch; }
+      else if (ch === '"') q = true;
+      else if (ch === d) { out.push(cur.trim()); cur = ""; }
+      else cur += ch;
+    }
+    out.push(cur.trim());
+    return out;
+  }
+  var ALIAS = {
+    side: /^(side|kind|type)$/i, station: /^(station|stn|from|at|occupied|setup)$/i, backsight: /^(backsight|back ?sight|bs)$/i,
+    angle: /^(angle|hz|ha|horizontal ?angle|h\.? ?angle)$/i, distance: /^(distance|dist|hd|horizontal ?distance|h\.? ?dist)$/i,
+    dh: /^(dh|ht ?diff|height ?diff(erence)?|vd|dz|delta ?h)$/i, east: /^(easting|east|e|x)$/i, north: /^(northing|north|n|y)$/i,
+    name: /^(name|to|foresight|fs|point|pt|target)$/i, desc: /^(description|desc|code|remarks?|note)$/i
+  };
+  /* the format the original Traverse Pro wrote: Station,Backsight,Angle,Distance,Easting,Northing,Name,Description */
+  var DEFAULT_COLS = ["station", "backsight", "angle", "distance", "east", "north", "name", "desc"];
+  function importText(text, fileName) {
+    var lines = text.replace(/^﻿/, "").split(/\r?\n/).filter(function (l) { return l.trim(); });
+    if (!lines.length) throw new Error("The file is empty.");
+    var d = lines[0].indexOf("\t") >= 0 ? "\t" : lines[0].indexOf(",") >= 0 ? "," : lines[0].indexOf(";") >= 0 ? ";" : /\s/.test(lines[0].trim()) ? " " : ",";
+    var table = lines.map(function (l) { return d === " " ? l.trim().split(/\s+/) : splitLine(l, d); });
+    var head = table[0], cols = null;
+    var looksHead = head.every(function (h) { return !ok(tn(h)) || h === ""; }) && head.some(function (h) { return Object.keys(ALIAS).some(function (k) { return ALIAS[k].test(h); }); });
+    if (looksHead) {
+      cols = head.map(function (h) { var k = Object.keys(ALIAS).filter(function (key) { return ALIAS[key].test(h.trim()); })[0]; return k || null; });
+      table = table.slice(1);
+    } else cols = DEFAULT_COLS;
+    var get = function (r, k) { var j = cols.indexOf(k); return j >= 0 && r[j] !== undefined ? r[j] : ""; };
+    if (!table.length) throw new Error("The file has a heading but no rows.");
+    var first = table[0], st0 = get(first, "station"), bs0 = get(first, "backsight");
+    if (st0) S.station = st0;
+    if (bs0) S.backsight = bs0;
+    S.rows = [];
+    S.adjusted = null; RUN = null;
+    var derived = 0;
+    table.forEach(function (r) {
+      var side = /side|ss|radial/i.test(get(r, "side")) ? SIDE : TRAV;
+      var row = { side: side, angle: get(r, "angle"), distance: get(r, "distance"), dh: get(r, "dh"), name: get(r, "name"), desc: get(r, "desc") };
+      var E = tn(get(r, "east")), N = tn(get(r, "north"));
+      if ((row.angle === "" || row.distance === "") && ok(E) && ok(N)) {
+        /* coordinates only: work the angle and distance back from the set-up */
+        RUN = null;
+        var pv = provisional(), k = side === SIDE ? Math.max(pv.L.tr.length - 1, 0) : pv.L.tr.length;
+        var from = pv.st[k];
+        if (from) { var lg = legTo(from, E, N); row.angle = lg.angle; row.distance = lg.distance; derived++; }
+      }
+      S.rows.push(row);
+    });
+    var tr = travRows(), last = tr[tr.length - 1];
+    if (last && String(last.name || "").trim() === String(S.station || "").trim()) S.type = "loop";
+    else if (S.type === "loop") S.type = "open";
+    S.job = String(fileName || "").replace(/\.[^.]+$/, "") || S.job;
+    changed(true);
+    toast("Loaded " + S.rows.length + " row" + (S.rows.length === 1 ? "" : "s") + " from " + fileName + "." + (derived ? " " + derived + " angle" + (derived === 1 ? " was" : "s were") + " worked out from coordinates." : ""));
+  }
+  function openFile(file) {
+    var rd = new FileReader();
+    rd.onload = function () {
+      try {
+        var text = String(rd.result);
+        if (/\.json$/i.test(file.name)) {
+          var j = JSON.parse(text);
+          if (!j || !Array.isArray(j.rows)) throw new Error("This is not a Traverse Pro job.");
+          if (j.v === 1) { S = Object.assign(blankState(), j); delete S.app; }
+          else throw new Error("This job was saved by another version of Traverse Pro.");
+          RUN = null; save(); renderAll(); toast("Opened " + file.name + ".");
+        } else importText(text, file.name);
+      } catch (e) { toast("Could not open " + file.name + ": " + e.message); }
+    };
+    rd.readAsText(file);
+  }
+
+  /* ---------- the report ---------- */
+  function reportHtml() {
+    var R = run();
+    renderClose();
+    var stamp = new Date().toLocaleString();
+    var ver = appVer();
+    var plan = "";
+    try { plan = '<img class="plan" alt="Plan" src="' + $("plan2").toDataURL("image/png") + '">'; } catch (e) { }
+    var tbl = function (id) { var el = $(id); return el ? el.closest("table").outerHTML : ""; };
+    var setup = [["Kind", TYPE[S.type]], ["Adjustment", METHOD[S.method]], ["Start", S.station + "  E " + S.startE + "  N " + S.startN + (S.startH ? "  Level " + S.startH : "")],
+      ["Backsight", S.bsMode === "point" ? S.backsight + "  E " + S.bsE + "  N " + S.bsN : "Bearing " + S.bsBrg],
+      ["Close", closed() ? closeName() + (S.type === "link" ? "  E " + S.closeE + "  N " + S.closeN : "") : "Open traverse"],
+      ["Closing orientation", closed() ? (S.closeMode === "none" ? "None" : S.closeMode === "bearing" ? "Bearing " + S.fsBrg : S.type === "loop" ? "Back onto the backsight" : S.fsName + "  E " + S.fsE + "  N " + S.fsN) + (S.closeMode !== "none" ? ", closing angle " + S.closeAngle : "") : "—"],
+      ["Angles", { dms: "DDD.MMSS", deg: "Decimal degrees", gon: "Gons" }[S.fmt] + ", " + (S.angleDir === "cw" ? "clockwise" : "anticlockwise")],
+      ["Scale factor", S.scale], ["Tolerance", S.tol.angK + '" × √n, 1 : ' + S.tol.ratio + (S.useH ? ", levels " + S.tol.hC + " mm × √km" : "")]];
+    var L = layout();
+    var obs = "<table><thead><tr><th>#</th><th>Side</th><th>Station</th><th>Backsight</th><th>Angle</th><th>Distance</th>" + (S.useH ? "<th>Ht diff</th>" : "") + "<th>Name</th><th>Description</th></tr></thead><tbody>" +
+      S.rows.map(function (r, i) { var inf = L.info[i]; return "<tr><td>" + (i + 1) + "</td><td>" + esc(r.side) + "</td><td>" + esc(inf.station) + "</td><td>" + esc(inf.bs) + "</td><td>" + esc(r.angle) + "</td><td>" + esc(r.distance) + "</td>" + (S.useH ? "<td>" + esc(r.dh) + "</td>" : "") + "<td>" + esc(inf.to) + "</td><td>" + esc(r.desc) + "</td></tr>"; }).join("") + "</tbody></table>";
+    var body = R.ok ? "<h2>Closure</h2>" + tbl("summary") + "<h2>Checks</h2>" + tbl("checks") + $("lsqBox").innerHTML + "<h2>Adjusted values</h2>" + tbl("adj") +
+      "<h2>Angles</h2>" + tbl("angles") + $("sideBox").innerHTML + ($("warnBox").innerHTML ? "<h2>Notes</h2><ul>" + $("warnBox").innerHTML + "</ul>" : "") + "<h2>Plan</h2>" + plan
+      : '<p class="err">Not adjusted: ' + esc(R.error) + "</p>";
+    return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>' + esc(S.job) + ' - traverse report</title><style>' +
+      'body{font:12px "Segoe UI",Arial,sans-serif;color:#222;margin:24px}h1{font-size:18px;margin:0;color:#1e2a38}h2{font-size:13px;margin:18px 0 6px;color:#1e2a38;border-bottom:2px solid #c6a15a;padding-bottom:2px}' +
+      '.sub{color:#666;margin:4px 0 12px}table{border-collapse:collapse;width:100%;margin:4px 0}th,td{border:1px solid #ccc;padding:3px 5px;text-align:center;white-space:nowrap}th{background:#f1f1f1}' +
+      'td.num{text-align:right;font-variant-numeric:tabular-nums}.badge{font-weight:700}.badge.pass{color:#14532d}.badge.fail{color:#8a1c10}.err{color:#8a1c10}' +
+      '.kv td:first-child{text-align:left;width:160px;background:#fafafa}.kv td{text-align:left}img.plan{width:100%;border:1px solid #ccc}.foot{margin-top:18px;color:#888;font-size:11px}' +
+      '.table-wrap{overflow:visible}@media print{body{margin:10mm}h2{break-after:avoid}tr{break-inside:avoid}}</style></head><body>' +
+      "<h1>Traverse adjustment: " + esc(S.job) + '</h1><div class="sub">' + esc(TYPE[S.type] + " · " + METHOD[S.method] + " · " + stamp) + "</div>" +
+      '<h2>Set-up</h2><table class="kv"><tbody>' + setup.map(function (x) { return "<tr><td>" + esc(x[0]) + "</td><td>" + esc(x[1]) + "</td></tr>"; }).join("") + "</tbody></table>" +
+      "<h2>Field book</h2>" + obs + body +
+      '<div class="foot">' + esc(ver) + (S.adjusted ? " · adjustment applied " + esc(new Date(S.adjusted.at).toLocaleString()) : " · adjustment not yet applied") + "</div></body></html>";
+  }
+  var REPORT = "";
+  function openReport() {
+    if ($("step2").hidden) show(2);
+    REPORT = reportHtml();
+    $("reportFrame").srcdoc = REPORT;
+    $("reportOverlay").hidden = false;
+  }
+
+  /* ---------- small things ---------- */
+  var toastT = 0;
+  function toast(msg) {
+    var t = $("toast"); t.textContent = msg; t.hidden = false;
+    clearTimeout(toastT); toastT = setTimeout(function () { t.hidden = true; }, 5200);
+  }
+  function appVer() {
+    if (window.__APP_VERSION__) return "Traverse Pro v" + window.__APP_VERSION__;
+    var v = document.querySelector(".ver");
+    return v ? v.textContent.trim() : "Traverse Pro";
+  }
+  function show(step) {
+    $("step1").hidden = step !== 1;
+    $("step2").hidden = step !== 2;
+    $("tab1").classList.toggle("on", step === 1);
+    $("tab2").classList.toggle("on", step === 2);
+    if (step === 2) { setClickMode(false); renderClose(); } else { $("msg").textContent = ""; draw($("plan"), false); }
+  }
+  function renderAll() { renderSetup(); renderTable(); }
+
+  /* ---------- wiring ---------- */
+  document.querySelectorAll("[data-s]").forEach(function (el) {
+    el.addEventListener(el.tagName === "SELECT" || el.type === "checkbox" ? "change" : "input", function () { onSetup(el); });
+  });
+  $("job").addEventListener("input", function () { S.job = $("job").value; save(); refresh(); });
+  $("body").addEventListener("input", function (e) { if (e.target.matches("input[data-k]")) { S.rows[+e.target.dataset.i][e.target.dataset.k] = e.target.value; RUN = null; S.adjusted = null; save(); refresh(); } });
+  $("body").addEventListener("change", function (e) {
+    if (e.target.matches("select[data-k]")) onRow(e.target);
+  });
+  $("body").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-del]"); if (!b) return;
+    S.rows.splice(+b.dataset.del, 1); changed(true);
+  });
+  $("tab1").onclick = function () { show(1); };
+  $("tab2").onclick = function () { show(2); };
+  $("backBtn").onclick = function () { show(1); };
+  $("rowBtn").onclick = addRow;
+  $("addBtn").onclick = function () { setClickMode(!clickMode); };
+  $("plan").addEventListener("click", function (ev) { if (!clickMode) return; var p = planPoint(ev); if (p) addByClick(p.E, p.N); });
+  $("plan").addEventListener("mousemove", function (ev) {
+    if (!clickMode) return;
+    var p = planPoint(ev), c = $("plan");
+    draw(c, false);
+    var pv = provisional(), from = pv.st[closed() && pv.L.tr.length >= 1 ? pv.L.tr.length - 1 : pv.L.tr.length];
+    if (!p || !from) return;
+    var g = c.getContext("2d"), X = function (e) { return VIEW.ox + (e - VIEW.minX) * VIEW.s; }, Y = function (n) { return VIEW.h - VIEW.oy - (n - VIEW.minY) * VIEW.s; };
+    var lg = legTo(from, p.E, p.N);
+    g.setLineDash([4, 4]); g.strokeStyle = "#c6a15a"; g.lineWidth = 1.5; g.beginPath(); g.moveTo(X(from.E), Y(from.N)); g.lineTo(X(p.E), Y(p.N)); g.stroke(); g.setLineDash([]);
+    g.fillStyle = "#8a6418"; g.font = "12px Segoe UI"; g.fillText(lg.angle + "  " + lg.distance + " m", X(p.E) + 8, Y(p.N) + 16);
+  });
+  $("loadBtn").onclick = function () { $("file").click(); };
+  $("file").onchange = function (ev) { var file = ev.target.files[0]; if (file) openFile(file); ev.target.value = ""; };
+  $("sampleBtn").onclick = function () {
+    if (S.rows.length && !confirm("Replace the rows here with the sample traverse?")) return;
+    S = sampleState(); RUN = null; save(); renderAll(); toast("Sample loaded: a primary loop on two pillars, levelled, with two side shots. Open step 2 to close it.");
+  };
+  $("newBtn").onclick = function () {
+    if (S.rows.length && !confirm("Start a new traverse? Save this one first if you need it.")) return;
+    S = blankState(); RUN = null; save(); renderAll(); show(1);
+  };
+  $("saveBtn").onclick = saveJob;
+  $("csvBtn").onclick = coordsCsv;
+  $("csv2Btn").onclick = coordsCsv;
+  $("method").onchange = function () { S.method = $("method").value; changed(false); renderSetup(); renderClose(); };
+  $("applyBtn").onclick = apply;
+  $("reportBtn").onclick = openReport;
+  $("printBtn").onclick = function () { var w = $("reportFrame").contentWindow; w.focus(); w.print(); };
+  $("saveRepBtn").onclick = function () { saveFile(REPORT, fileBase() + " report.html", "text/html;charset=utf-8"); };
+  $("closeRepBtn").onclick = function () { $("reportOverlay").hidden = true; };
+  document.addEventListener("dragover", function (e) { e.preventDefault(); });
+  document.addEventListener("drop", function (e) { e.preventDefault(); var file = e.dataTransfer.files[0]; if (file) openFile(file); });
+  document.addEventListener("keydown", function (e) {
+    var k = e.key.toLowerCase();
+    if ((e.ctrlKey || e.metaKey) && k === "s") { e.preventDefault(); saveJob(); }
+    else if ((e.ctrlKey || e.metaKey) && k === "o") { e.preventDefault(); $("file").click(); }
+    else if (e.key === "Escape") { if (!$("reportOverlay").hidden) $("reportOverlay").hidden = true; else if (clickMode) setClickMode(false); }
+  });
+  var rsT = 0;
+  window.addEventListener("resize", function () { clearTimeout(rsT); rsT = setTimeout(function () { draw($("plan"), false); if (!$("step2").hidden) draw($("plan2"), true); }, 120); });
+
+  /* the installed program says which version it is */
+  if (window.__APP_VERSION__) document.querySelectorAll(".ver").forEach(function (el) { el.textContent = "Traverse Pro v" + window.__APP_VERSION__; });
+
+  /* the Windows program reports its self-update here */
+  window.__showUpdateProgress = function (st, ver) {
+    var o = $("updateOverlay");
+    if (st === "downloading") { o.hidden = false; $("updTitle").textContent = "Downloading update…"; $("updDesc").textContent = "Downloading Traverse Pro " + (ver || "") + ". The program restarts by itself in a few seconds."; }
+    else if (st === "installing") { o.hidden = false; $("updTitle").textContent = "Installing update…"; $("updDesc").textContent = "Restarting Traverse Pro now…"; }
+    else if (st === "failed") { $("updTitle").textContent = "Update interrupted"; $("updDesc").textContent = (ver || "The update could not be downloaded.") + " You can carry on working."; setTimeout(function () { o.hidden = true; }, 3500); }
+    else o.hidden = true;
+  };
+
+  /* for checks from outside the page */
+  window.TraversePro = { state: function () { return JSON.parse(JSON.stringify(S)); }, run: function () { RUN = null; return run(); }, importText: importText };
+
+  renderAll();
+  if (location.hash === "#2") show(2);
+})();
+</script>
+</body>
+</html>

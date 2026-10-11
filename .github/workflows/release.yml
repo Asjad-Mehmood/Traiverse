@@ -1,9 +1,10 @@
 name: Build and Release
 
-# Runs when you push a tag such as v1.0.1 (publishing a GitHub release with a new tag does this).
+# Runs when you push a tag such as v2.0.2 (publishing a GitHub release with a new tag does this).
 #
 # This repository (Asjad-Mehmood/Traiverse) is public, so its releases are public too: every
-# installed copy reads latest.json and the installer from this repository's latest release.
+# installed copy reads latest.json and the installer from this repository's latest release, and
+# www.exceltokml.com/traverse links to the installer there.
 # The release description comes from docs/releases/<tag>.md when that file exists.
 on:
   push:
@@ -23,21 +24,15 @@ jobs:
         with:
           go-version: '1.22'
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Check the traverse engine
-        run: node tools/check-engine.js
-
-      - name: Check the Qatar National Grid
-        run: node tools/check-qng.js
+      - name: Test the self-updater
+        working-directory: lite
+        run: go test ./update/
 
       - name: Read version from tag
         shell: pwsh
         run: |
           $ver = "${{ github.ref_name }}".TrimStart('v')
-          if ($ver -notmatch '^\d+\.\d+\.\d+$') { throw "A release tag is v and three numbers, for example v1.0.1. Got: ${{ github.ref_name }}" }
+          if ($ver -notmatch '^\d+\.\d+\.\d+$') { throw "A release tag is v and three numbers, for example v2.0.2. Got: ${{ github.ref_name }}" }
           "VERSION=$ver" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
       - name: Stamp version into versioninfo.json
@@ -60,14 +55,9 @@ jobs:
         shell: pwsh
         working-directory: lite
         run: |
-          Copy-Item ../app/index.html index.html
-          $today = (Get-Date).ToString("dd-MMM-yyyy")
-          $html = [System.IO.File]::ReadAllText("$pwd/index.html", [System.Text.Encoding]::UTF8)
-          $html = [System.Text.RegularExpressions.Regex]::Replace($html, '(?s)<span class="ver"[^>]*>.*?</span>', "<span class=`"ver`">Traverse Pro v$($env:VERSION) &middot; build $today</span>")
-          [System.IO.File]::WriteAllText("$pwd/index.html", $html, [System.Text.Encoding]::UTF8)
           go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@latest
           & "$(go env GOPATH)\bin\goversioninfo.exe" -64
-          go build -ldflags "-H=windowsgui -s -w -X main.appVersion=$env:VERSION" -o TraversePro.exe .
+          go build -ldflags "-H=windowsgui -s -w -X main.appVersion=$env:VERSION" -o TraverseLevel.exe .
 
       - name: Build the installer
         shell: pwsh
@@ -75,13 +65,16 @@ jobs:
         run: |
           if (-not (Test-Path "C:\Program Files (x86)\NSIS\makensis.exe")) { choco install nsis -y --no-progress }
           & "C:\Program Files (x86)\NSIS\makensis.exe" "/DVERSION=$env:VERSION" installer.nsi
-          if (-not (Test-Path TraversePro-Setup.exe)) { throw "Installer was not created" }
+          if (-not (Test-Path TraverseLevel-Setup.exe)) { throw "Installer was not created" }
+          # Traverse Pro 1.x copies update from TraversePro-Setup.exe: the same installer under
+          # that name (same bytes, so the same SHA-256 in latest.json)
+          Copy-Item TraverseLevel-Setup.exe TraversePro-Setup.exe
 
       - name: Write latest.json
         shell: pwsh
         working-directory: lite
         run: |
-          $h = (Get-FileHash TraversePro-Setup.exe -Algorithm SHA256).Hash.ToLower()
+          $h = (Get-FileHash TraverseLevel-Setup.exe -Algorithm SHA256).Hash.ToLower()
           '{"version":"' + $env:VERSION + '","sha256":"' + $h + '"}' | Set-Content latest.json -Encoding ascii
 
       - name: Find the release notes
@@ -94,9 +87,31 @@ jobs:
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
-          name: Traverse Pro ${{ github.ref_name }}
+          name: Traverse & Level ${{ github.ref_name }}
           body_path: ${{ steps.notes.outputs.path }}
           make_latest: true
           files: |
+            lite/TraverseLevel-Setup.exe
             lite/TraversePro-Setup.exe
             lite/latest.json
+
+  # Download the published release the way installed copies do: latest.json, then both installer
+  # names, each checked against its SHA-256. A failure here means installed copies cannot update.
+  verify:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Download and verify the release
+        working-directory: lite
+        run: |
+          for i in 1 2 3 4 5; do
+            go run ./cmd/checkrelease -want "${GITHUB_REF_NAME#v}" && exit 0
+            echo "Not available yet; trying again in 30 s"; sleep 30
+          done
+          exit 1

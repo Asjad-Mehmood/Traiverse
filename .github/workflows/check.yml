@@ -1,7 +1,7 @@
 name: Check
 
-# On every push and pull request: the traverse engine still gives the known answers, and the
-# Windows program still builds. Nothing is published.
+# On every push and pull request: the self-updater passes its tests, the Windows program and its
+# installer still build, and the web app it opens is up. Nothing is published.
 on:
   push:
     branches-ignore:
@@ -17,28 +17,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Check the traverse engine
-        run: node tools/check-engine.js
-
-      - name: Check the Qatar National Grid
-        run: node tools/check-qng.js
-
-      - name: Check the page's scripts parse
-        run: |
-          node -e '
-            const h = require("fs").readFileSync("app/index.html", "utf8");
-            const s = [...h.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]);
-            if (!s.length) throw new Error("no scripts found");
-            s.forEach(x => new Function(x));
-            console.log(s.length + " scripts parse");'
-
       - uses: actions/setup-go@v5
         with:
           go-version: '1.22'
+
+      - name: Test the self-updater
+        working-directory: lite
+        run: go test ./update/
 
       - name: Build the Windows program
         working-directory: lite
@@ -46,6 +31,19 @@ jobs:
           GOOS: windows
           GOARCH: amd64
         run: |
-          cp ../app/index.html index.html
-          go vet .
-          go build -ldflags "-H=windowsgui -s -w" -o TraversePro.exe .
+          go vet ./...
+          go build -ldflags "-H=windowsgui -s -w" -o TraverseLevel.exe .
+
+      - name: Build the installer
+        working-directory: lite
+        run: |
+          sudo apt-get install -y --no-install-recommends nsis >/dev/null
+          makensis -V2 -DVERSION=0.0.0 installer.nsi
+          test -f TraverseLevel-Setup.exe
+
+      - name: The web app answers
+        run: |
+          url=$(grep -oE 'https://www\.exceltokml\.com/traverse/app' lite/main.go | head -1)
+          code=$(curl -s -o /dev/null -w '%{http_code}' -L --max-time 30 "$url")
+          echo "$url -> $code"
+          [ "$code" = "200" ] || echo "::warning::$url answered $code"

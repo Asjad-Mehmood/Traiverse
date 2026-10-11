@@ -9,22 +9,16 @@ package main
 // Any network problem is ignored: the program simply starts as normal.
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
-	"encoding/json"
-	"errors"
-	"io"
-	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strconv"
-	"strings"
 	"syscall"
 	"time"
 	"unsafe"
 
 	"github.com/jchv/go-webview2"
+
+	"traverselevel/update"
 )
 
 const (
@@ -41,11 +35,6 @@ const (
 // Overwritten at build time by the workflow (-X main.appVersion=...).
 var appVersion = "0.0.0"
 
-type updateInfo struct {
-	Version string `json:"version"`
-	SHA256  string `json:"sha256"`
-}
-
 func askYesNo(msg string) bool {
 	mb := syscall.NewLazyDLL("user32.dll").NewProc("MessageBoxW")
 	t, _ := syscall.UTF16PtrFromString(appName)
@@ -55,84 +44,10 @@ func askYesNo(msg string) bool {
 	return r == 6
 }
 
-func parseVer(v string) [3]int {
-	v = strings.TrimPrefix(strings.TrimSpace(v), "v")
-	var out [3]int
-	for i, p := range strings.SplitN(v, ".", 3) {
-		if j := strings.IndexAny(p, "-+"); j >= 0 {
-			p = p[:j]
-		}
-		n, _ := strconv.Atoi(p)
-		out[i] = n
-	}
-	return out
-}
-
-func isNewer(remote, local string) bool {
-	r, l := parseVer(remote), parseVer(local)
-	for i := 0; i < 3; i++ {
-		if r[i] != l[i] {
-			return r[i] > l[i]
-		}
-	}
-	return false
-}
-
-func fetchUpdateInfo() (*updateInfo, error) {
-	c := &http.Client{Timeout: 10 * time.Second}
-	resp, err := c.Get(updateBase + manifestName)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
-		return nil, errors.New("update manifest: " + resp.Status)
-	}
-	var u updateInfo
-	if err := json.NewDecoder(io.LimitReader(resp.Body, 4096)).Decode(&u); err != nil {
-		return nil, err
-	}
-	if u.Version == "" || len(u.SHA256) != 64 {
-		return nil, errors.New("bad update manifest")
-	}
-	return &u, nil
-}
-
-func downloadInstaller(dest, wantSum string) error {
-	c := &http.Client{Timeout: 10 * time.Minute}
-	resp, err := c.Get(updateBase + installerName)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
-		return errors.New("download: " + resp.Status)
-	}
-	f, err := os.Create(dest)
-	if err != nil {
-		return err
-	}
-	h := sha256.New()
-	_, err = io.Copy(io.MultiWriter(f, h), resp.Body)
-	cerr := f.Close()
-	if err == nil {
-		err = cerr
-	}
-	if err != nil {
-		os.Remove(dest)
-		return err
-	}
-	if !strings.EqualFold(hex.EncodeToString(h.Sum(nil)), wantSum) {
-		os.Remove(dest)
-		return errors.New("the downloaded file failed its safety check")
-	}
-	return nil
-}
-
 func checkForUpdate(w webview2.WebView) {
 	time.Sleep(4 * time.Second) // let the window appear first
-	u, err := fetchUpdateInfo()
-	if err != nil || !isNewer(u.Version, appVersion) {
+	u, err := update.Fetch(updateBase + manifestName)
+	if err != nil || !update.IsNewer(u.Version, appVersion) {
 		return
 	}
 	if !askYesNo("A new version of Traverse & Level is available.\n\n" +
@@ -149,7 +64,7 @@ func checkForUpdate(w webview2.WebView) {
 	}
 
 	dest := filepath.Join(os.TempDir(), "TraverseLevel-Update.exe")
-	if err := downloadInstaller(dest, u.SHA256); err != nil {
+	if err := update.Download(updateBase+installerName, dest, u.SHA256); err != nil {
 		if w != nil {
 			w.Dispatch(func() {
 				w.Eval("window.__showUpdateProgress && window.__showUpdateProgress('failed', 'Download could not be completed.');")

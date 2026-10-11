@@ -24,6 +24,10 @@ jobs:
         with:
           go-version: '1.22'
 
+      - name: Test the self-updater
+        working-directory: lite
+        run: go test ./update/
+
       - name: Read version from tag
         shell: pwsh
         run: |
@@ -90,3 +94,24 @@ jobs:
             lite/TraverseLevel-Setup.exe
             lite/TraversePro-Setup.exe
             lite/latest.json
+
+  # Download the published release the way installed copies do: latest.json, then both installer
+  # names, each checked against its SHA-256. A failure here means installed copies cannot update.
+  verify:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Download and verify the release
+        working-directory: lite
+        run: |
+          for i in 1 2 3 4 5; do
+            go run ./cmd/checkrelease -want "${GITHUB_REF_NAME#v}" && exit 0
+            echo "Not available yet; trying again in 30 s"; sleep 30
+          done
+          exit 1

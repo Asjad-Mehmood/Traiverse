@@ -1,7 +1,7 @@
 name: Check
 
-# On every push and pull request: the Windows program and its installer still build, and the web
-# app it opens is up. Nothing is published.
+# On every push and pull request: the self-updater passes its tests, the Windows program and its
+# installer still build, and the web app it opens is up. Nothing is published.
 on:
   push:
     branches-ignore:
@@ -21,13 +21,17 @@ jobs:
         with:
           go-version: '1.22'
 
+      - name: Test the self-updater
+        working-directory: lite
+        run: go test ./update/
+
       - name: Build the Windows program
         working-directory: lite
         env:
           GOOS: windows
           GOARCH: amd64
         run: |
-          go vet .
+          go vet ./...
           go build -ldflags "-H=windowsgui -s -w" -o TraverseLevel.exe .
 
       - name: Build the installer

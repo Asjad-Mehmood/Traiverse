@@ -72,7 +72,9 @@ open the program again.
 ```
 lite/main.go              the Windows program (Go + WebView2): a window on the web app
 lite/offline.html         shown only if the very first start has no internet
-lite/update_windows.go    the self-updater (reads latest.json from the latest release)
+lite/update_windows.go    the self-updater: asks, then runs the installer
+lite/update/              reads latest.json, compares versions, downloads and checks the installer (tested)
+lite/cmd/checkrelease/    downloads a published release the way installed copies do
 lite/installer.nsi        the installer (NSIS), per user, no administrator rights
 .github/workflows/        check.yml on every push; release.yml builds and publishes on a version tag
 docs/releases/            release notes, one file per tag
@@ -97,7 +99,10 @@ The same as Excel to KML:
    - builds `TraverseLevel.exe` and the installer `TraverseLevel-Setup.exe`;
    - writes `latest.json` with the version and the installer's SHA-256;
    - attaches the installer (also as `TraversePro-Setup.exe`, the name Traverse Pro 1.x updates
-     from) and `latest.json` to the release, with `docs/releases/<tag>.md` as the description.
+     from) and `latest.json` to the release, with `docs/releases/<tag>.md` as the description;
+   - then downloads the published release the way installed copies do (`lite/cmd/checkrelease`):
+     `latest.json`, then both installer names, each checked against its SHA-256. If that job
+     fails, installed copies cannot update: fix it before anything else.
 
 Installed copies read `latest.json` from the latest release of this repository. They update only
 when its version is higher than their own, and only if the download matches the SHA-256.

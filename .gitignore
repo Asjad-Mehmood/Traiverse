@@ -1,7 +1,6 @@
 # Build outputs
 lite/*.exe
 lite/*.syso
-lite/index.html
 lite/latest.json
 *.exe
 

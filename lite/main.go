@@ -1,90 +1,87 @@
-// Traverse Pro - lightweight Windows shell.
-// Uses the WebView2 runtime that ships with Windows 10 and 11, so the program
-// itself stays small. The whole program is app/index.html, embedded at build time.
+// Traverse & Level - lightweight Windows shell.
+// Uses the WebView2 runtime that ships with Windows 10 and 11, so the program itself stays
+// small. The window opens the web app at www.exceltokml.com/traverse/app, so the user signs in
+// with their Excel to KML account and every job is saved to that account. After the first
+// visit the web app keeps its files on this computer, so the window also opens offline.
 package main
 
 import (
 	_ "embed"
-	"fmt"
-	"net"
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
+	"strings"
 	"syscall"
+	"time"
 	"unsafe"
 
 	"github.com/jchv/go-webview2"
 )
 
-//go:embed index.html
-var page []byte
+const (
+	appName = "Traverse & Level"
+	appURL  = "https://www.exceltokml.com/traverse/app"
+)
+
+// shown only when the web app has never been opened on this computer and there is no internet
+//
+//go:embed offline.html
+var offlinePage string
 
 func warn(msg string) {
 	user32 := syscall.NewLazyDLL("user32.dll")
 	mb := user32.NewProc("MessageBoxW")
-	t, _ := syscall.UTF16PtrFromString("Traverse Pro")
+	t, _ := syscall.UTF16PtrFromString(appName)
 	m, _ := syscall.UTF16PtrFromString(msg)
 	mb.Call(0, uintptr(unsafe.Pointer(m)), uintptr(unsafe.Pointer(t)), 0x10)
 }
 
-func main() {
-	// Serve the page from loopback only. Nothing is exposed to the network.
-	// Browser storage is tied to the address, port included, so a fixed port keeps the
-	// traverse you were working on between launches. The fallbacks only matter if
-	// something else already holds it. (Excel to KML uses 47831-47833.)
-	var ln net.Listener
-	var err error
-	for _, port := range []string{"47851", "47852", "47853", "0"} {
-		ln, err = net.Listen("tcp", "127.0.0.1:"+port)
-		if err == nil {
-			break
-		}
-	}
+// reachable reports whether the web app answers within a few seconds.
+func reachable() bool {
+	c := &http.Client{Timeout: 8 * time.Second}
+	resp, err := c.Head(appURL)
 	if err != nil {
-		warn("Could not start the local viewer.\n\n" + err.Error())
-		return
+		return false
 	}
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Header().Set("Cache-Control", "no-store")
-		w.Write(page)
-	})
-	go http.Serve(ln, mux)
+	resp.Body.Close()
+	return resp.StatusCode < 500
+}
 
-	url := fmt.Sprintf("http://127.0.0.1:%d/", ln.Addr().(*net.TCPAddr).Port)
+func main() {
+	// a fixed data folder: the sign-in, the offline copy of the app and the jobs waiting to
+	// upload are kept here, so they survive restarts and updates
+	dataPath := filepath.Join(os.Getenv("AppData"), "TraverseLevel")
+	marker := filepath.Join(dataPath, "opened-online")
 
 	w := webview2.NewWithOptions(webview2.WebViewOptions{
-		// a fixed data folder, so the work kept in the window survives updates
-		DataPath:  filepath.Join(os.Getenv("AppData"), "TraversePro"),
+		DataPath:  dataPath,
 		Debug:     false,
 		AutoFocus: true,
 		WindowOptions: webview2.WindowOptions{
-			Title:  "Traverse Pro",
-			Width:  1240,
-			Height: 840,
+			Title:  "Professional Traverse and Level Adjustment Software",
+			Width:  1440,
+			Height: 920,
 			IconId: 2,
 			Center: true,
 		},
 	})
 	if w == nil {
 		warn("This computer does not have the Microsoft Edge WebView2 runtime.\n\n" +
-			"Install the WebView2 Runtime free from Microsoft, then open Traverse Pro again.")
+			"Install the WebView2 Runtime free from Microsoft, then open Traverse & Level again.")
 		return
 	}
 	defer w.Destroy()
 
-	// the page calls this to save any file through the Windows Save As window
-	owner := uintptr(w.Window())
-	w.Bind("traverseSave", func(name string, b64 string) (string, error) {
-		return saveWithDialog(owner, name, b64)
-	})
-
-	w.Init("window.__APP_VERSION__ = " + strconv.Quote(appVersion) + ";")
-
 	go checkForUpdate(w)
 
-	w.Navigate(url)
+	// Once the app has been opened online, its own offline copy takes over when there is no
+	// internet, so go straight to it. The very first time, it needs a connection.
+	if _, err := os.Stat(marker); err == nil || reachable() {
+		os.MkdirAll(dataPath, 0o755)
+		os.WriteFile(marker, []byte(time.Now().Format(time.RFC3339)), 0o644)
+		w.Navigate(appURL)
+	} else {
+		w.SetHtml(strings.ReplaceAll(offlinePage, "{{APP_URL}}", appURL))
+	}
 	w.Run()
 }

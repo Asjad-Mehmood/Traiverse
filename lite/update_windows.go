@@ -2,7 +2,7 @@
 
 package main
 
-// Self-update for Traverse Pro.
+// Self-update for Traverse & Level.
 // On start-up the program reads latest.json from your newest GitHub release.
 // If the version there is higher, it asks the user, downloads the installer,
 // checks its SHA-256, runs it silently and the installer reopens the program.
@@ -32,7 +32,9 @@ const (
 	// copy reads this address, so keep it working: if the code ever moves to a private
 	// repository, publish the releases to a public one and keep this name (see README).
 	updateBase    = "https://github.com/Asjad-Mehmood/Traiverse/releases/latest/download/"
-	installerName = "TraversePro-Setup.exe"
+	// Traverse Pro 1.x copies look for TraversePro-Setup.exe; each release carries the same
+	// installer under that name too, so they update into Traverse & Level.
+	installerName = "TraverseLevel-Setup.exe"
 	manifestName  = "latest.json"
 )
 
@@ -46,7 +48,7 @@ type updateInfo struct {
 
 func askYesNo(msg string) bool {
 	mb := syscall.NewLazyDLL("user32.dll").NewProc("MessageBoxW")
-	t, _ := syscall.UTF16PtrFromString("Traverse Pro")
+	t, _ := syscall.UTF16PtrFromString(appName)
 	m, _ := syscall.UTF16PtrFromString(msg)
 	// 0x24 = Yes/No + question icon, 0x40000 = stay on top. 6 = Yes.
 	r, _, _ := mb.Call(0, uintptr(unsafe.Pointer(m)), uintptr(unsafe.Pointer(t)), 0x40024)
@@ -133,7 +135,7 @@ func checkForUpdate(w webview2.WebView) {
 	if err != nil || !isNewer(u.Version, appVersion) {
 		return
 	}
-	if !askYesNo("A new version of Traverse Pro is available.\n\n" +
+	if !askYesNo("A new version of Traverse & Level is available.\n\n" +
 		"Installed: " + appVersion + "\nNew: " + u.Version + "\n\n" +
 		"Update now? The program will close, update itself and reopen in a few seconds.") {
 		return
@@ -146,7 +148,7 @@ func checkForUpdate(w webview2.WebView) {
 		})
 	}
 
-	dest := filepath.Join(os.TempDir(), "TraversePro-Update.exe")
+	dest := filepath.Join(os.TempDir(), "TraverseLevel-Update.exe")
 	if err := downloadInstaller(dest, u.SHA256); err != nil {
 		if w != nil {
 			w.Dispatch(func() {

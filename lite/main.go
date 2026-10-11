@@ -21,6 +21,9 @@ import (
 const (
 	appName = "Traverse & Level"
 	appURL  = "https://www.exceltokml.com/traverse/app"
+	// ?app=1 opens it as an app: no front page, straight to log in (or the dashboard when
+	// already signed in)
+	startURL = appURL + "?app=1"
 )
 
 // shown only when the web app has never been opened on this computer and there is no internet
@@ -79,9 +82,9 @@ func main() {
 	if _, err := os.Stat(marker); err == nil || reachable() {
 		os.MkdirAll(dataPath, 0o755)
 		os.WriteFile(marker, []byte(time.Now().Format(time.RFC3339)), 0o644)
-		w.Navigate(appURL)
+		w.Navigate(startURL)
 	} else {
-		w.SetHtml(strings.ReplaceAll(offlinePage, "{{APP_URL}}", appURL))
+		w.SetHtml(strings.ReplaceAll(offlinePage, "{{APP_URL}}", startURL))
 	}
 	w.Run()
 }

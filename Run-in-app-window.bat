@@ -1,7 +1,7 @@
 @echo off
 rem Quick launcher - opens Traverse & Level in its own window using Edge or Chrome.
 rem No installation needed: it opens the web app, so you log in with your Excel to KML account.
-set "APP=https://www.exceltokml.com/traverse/app"
+set "APP=https://www.exceltokml.com/traverse/app?app=1"
 set "PROF=%LOCALAPPDATA%\TraverseLevel\browserprofile"
 
 set "EDGE=%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe"

@@ -31,7 +31,7 @@ const (
 	// The releases of this repository. It is public, so its releases are too. Every installed
 	// copy reads this address, so keep it working: if the code ever moves to a private
 	// repository, publish the releases to a public one and keep this name (see README).
-	updateBase    = "https://github.com/Asjad-Mehmood/Traiverse/releases/latest/download/"
+	updateBase = "https://github.com/Asjad-Mehmood/Traiverse/releases/latest/download/"
 	// Traverse Pro 1.x copies look for TraversePro-Setup.exe; each release carries the same
 	// installer under that name too, so they update into Traverse & Level.
 	installerName = "TraverseLevel-Setup.exe"

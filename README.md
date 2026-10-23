@@ -2,9 +2,9 @@
 
 **Professional Traverse and Level Adjustment Software.** *Precision in every point.*
 
-Enter the coordinates you measure on site, close on a known point and get an adjusted, checked
-result with a signed PDF report. Level books are reduced, checked and adjusted the same way.
-Every job is saved to your Excel to KML account, ready to open, copy or share.
+Enter the coordinates you measure on site, or the angles and distances from your field book, close
+on a known point and get an adjusted, checked result with a signed PDF report. Level books are
+reduced, checked and adjusted the same way. Every job is saved to your Excel to KML account, ready to open, copy or share.
 
 <img src="app/icon-512.png" alt="" width="96">
 
@@ -17,12 +17,19 @@ Every job is saved to your Excel to KML account, ready to open, copy or share.
 
 ## What it does
 
-- **Coordinate traverse.** Station, backsight, the points measured on site and the closing point.
-  Closed or open, typed or pasted from Excel. Bowditch, Transit or Equal adjustment, checked
-  against your precision 1 : N.
+- **Traverse from coordinates or from the field book.** Station, backsight and closing point,
+  then either the points as measured on site, or the angles and distances your instrument
+  recorded, with side shots and levels. Closed, open, or open closing on a known point; typed,
+  pasted from Excel or imported from CSV.
+- **Checked and adjusted.** Linear precision 1 : N, angular misclosure K" x sqrt(n) and level
+  misclosure C mm x sqrt(km). Bowditch, Transit or Equal, or a weighted least squares adjustment
+  of the angles and distances with residuals, error ellipses and the chi-square test.
+- **Qatar National Grid (QND95).** The grid scale factor is worked out for the job, and every point
+  gets its WGS84 latitude and longitude, with the same formulas as Excel to KML.
 - **Levelling.** Rise & Fall or Height of Instrument, the arithmetic checks, misclosure against
   your allowable and adjusted RLs.
-- **PDF reports** with your report details and boxes for Surveyed, Checked and Approved by.
+- **PDF reports** with your report details and boxes for Surveyed, Checked and Approved by,
+  plus a coordinates CSV and a Google Earth (KML) file.
 - **Dashboard, sharing and a traverse simulator** for training.
 - **Offline, dark mode and phone.** After the first login it also opens without internet.
 
@@ -32,7 +39,9 @@ The full step-by-step manual is on the [product page](https://www.exceltokml.com
 
 The program is a window onto the web app at
 [www.exceltokml.com/traverse/app](https://www.exceltokml.com/traverse/app), in its own Start
-menu entry and desktop shortcut, so the program and the website always match:
+menu entry and desktop shortcut, so the program and the website always match. New app features,
+such as the field book, least squares and Qatar National Grid of version 2.1, reach the program
+without a new installer:
 
 - **Log in with your Excel to KML account.** The same account as the website, and the same jobs.
 - **Jobs are saved to your account** and appear in the web app and on your phone too.

@@ -47,3 +47,71 @@ jobs:
           code=$(curl -s -o /dev/null -w '%{http_code}' -L --max-time 30 "$url")
           echo "$url -> $code"
           [ "$code" = "200" ] || echo "::warning::$url answered $code"
+
+  installer-windows:
+    # a plain silent install (/S, the in-app updater) opens the program; /S /NOLAUNCH (Survey
+    # Toolkit's background updates) does not. Checked around a stand-in program that only leaves a mark.
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Build the installer around a stand-in program
+        run: |
+          $d = Join-Path $env:RUNNER_TEMP 'standin'
+          New-Item -ItemType Directory -Force $d | Out-Null
+          Set-Content (Join-Path $d 'main.go') @'
+          package main
+
+          import (
+          	"os"
+          	"path/filepath"
+          )
+
+          func main() {
+          	os.WriteFile(filepath.Join(os.Getenv("LOCALAPPDATA"), "standin-opened.txt"), []byte("opened"), 0o644)
+          }
+          '@
+          Push-Location $d
+          go mod init standin
+          go build -ldflags "-H=windowsgui" -o (Join-Path $env:GITHUB_WORKSPACE 'lite\TraverseLevel.exe') .
+          Pop-Location
+          if (-not (Test-Path "C:\Program Files (x86)\NSIS\makensis.exe")) { choco install nsis -y --no-progress }
+          Set-Location lite
+          & "C:\Program Files (x86)\NSIS\makensis.exe" /V2 /DVERSION=0.0.1 installer.nsi
+          if ($LASTEXITCODE -ne 0) { throw "makensis failed" }
+
+      - name: /S opens the program, /S /NOLAUNCH does not
+        run: |
+          $mark = Join-Path $env:LOCALAPPDATA 'standin-opened.txt'
+          $setup = Resolve-Path 'lite\TraverseLevel-Setup.exe'
+          function Install($argList) {
+            Remove-Item $mark -ErrorAction SilentlyContinue
+            $p = Start-Process -FilePath $setup -ArgumentList $argList -PassThru -Wait
+            if ($p.ExitCode -ne 0) { throw "installer $argList exited $($p.ExitCode)" }
+            Start-Sleep -Seconds 6
+            $v = (Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\TraversePro').DisplayVersion
+            if ($v -ne '0.0.1') { throw "installed version is '$v'" }
+            return (Test-Path $mark)
+          }
+          $opened = Install @('/S', '/NOLAUNCH')
+          Write-Host "/S /NOLAUNCH opened the program: $opened"
+          if ($opened) { throw '/S /NOLAUNCH opened the program' }
+          $opened = Install @('/S')
+          Write-Host "/S opened the program: $opened"
+          if (-not $opened) { throw '/S did not open the program' }
+          $opened = Install @('/S', '/nolaunch')
+          Write-Host "/S /nolaunch opened the program: $opened"
+          if ($opened) { throw '/S /nolaunch opened the program' }
+
+      - name: Uninstall
+        if: always()
+        run: |
+          $u = Join-Path $env:LOCALAPPDATA 'TraversePro\Uninstall.exe'
+          if (Test-Path $u) { Start-Process -FilePath $u -ArgumentList '/S' -Wait }

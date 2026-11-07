@@ -1,7 +1,7 @@
 ; Installer for Traverse & Level (Professional Traverse and Level Adjustment Software).
 Unicode true
 !ifndef VERSION
-  !define VERSION "2.1.0"
+  !define VERSION "2.1.1"
 !endif
 Name "Traverse & Level"
 OutFile "TraverseLevel-Setup.exe"
@@ -14,6 +14,7 @@ SetCompressor /SOLID lzma
 ShowInstDetails show
 
 !include "MUI2.nsh"
+!include "FileFunc.nsh"
 !define MUI_ICON "icon.ico"
 !define MUI_UNICON "icon.ico"
 !define MUI_ABORTWARNING
@@ -89,8 +90,13 @@ Section "Install"
               "NoModify" 1
   WriteUninstaller "$INSTDIR\Uninstall.exe"
 
-  ; silent run = started by the in-app updater, so reopen the program
+  ; silent run = started by the in-app updater, so reopen the program.
+  ; /NOLAUNCH (Survey Toolkit's background updates, from 2.1.1): install only, don't open it
   IfSilent 0 skip_launch
+    ${GetParameters} $R0
+    ClearErrors
+    ${GetOptions} $R0 "/NOLAUNCH" $R1
+    IfErrors 0 skip_launch
     Exec '"$INSTDIR\TraverseLevel.exe"'
   skip_launch:
 SectionEnd

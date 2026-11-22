@@ -72,6 +72,35 @@ func reachable() bool {
 	return resp.StatusCode < 500
 }
 
+// whereToOpen finds where the window opens, which takes a moment (the internet, the Toolkit's
+// sign-in), and gives what to do with the window then
+func whereToOpen(dataPath, marker string) func(webview2.WebView) {
+	// Once the app has been opened online, its own offline copy takes over when there is no
+	// internet, so go straight to it. The very first time, it needs a connection.
+	if _, err := os.Stat(marker); err == nil || reachable() {
+		os.MkdirAll(dataPath, 0o755)
+		os.WriteFile(marker, []byte(time.Now().Format(time.RFC3339)), 0o644)
+		// the Toolkit's code needs the website; offline, the app's own copy opens as before
+		code := signInCode(os.Args[1:])
+		// opened from a shortcut: the Survey Toolkit on this PC, if it is signed in, gives a code for
+		// its account, once (the website leaves a sign-in the window already has as it is)
+		toolkitMarker := filepath.Join(dataPath, "signed-in-by-toolkit")
+		if _, err := os.Stat(toolkitMarker); code == "" && err != nil {
+			code = askToolkitForCode("traverse")
+		}
+		if code != "" && !reachable() {
+			code = ""
+		}
+		if code != "" {
+			os.WriteFile(toolkitMarker, []byte(time.Now().Format(time.RFC3339)), 0o644)
+		}
+		first := firstURL(code)
+		return func(w webview2.WebView) { w.Navigate(first) }
+	}
+	page := strings.ReplaceAll(offlinePage, "{{APP_URL}}", startURL)
+	return func(w webview2.WebView) { w.SetHtml(page) }
+}
+
 func main() {
 	// a fixed data folder: the sign-in, the offline copy of the app and the jobs waiting to
 	// upload are kept here, so they survive restarts and updates
@@ -99,28 +128,11 @@ func main() {
 
 	go checkForUpdate(w)
 
-	// Once the app has been opened online, its own offline copy takes over when there is no
-	// internet, so go straight to it. The very first time, it needs a connection.
-	if _, err := os.Stat(marker); err == nil || reachable() {
-		os.MkdirAll(dataPath, 0o755)
-		os.WriteFile(marker, []byte(time.Now().Format(time.RFC3339)), 0o644)
-		// the Toolkit's code needs the website; offline, the app's own copy opens as before
-		code := signInCode(os.Args[1:])
-		// opened from a shortcut: the Survey Toolkit on this PC, if it is signed in, gives a code for
-		// its account, once (the website leaves a sign-in the window already has as it is)
-		toolkitMarker := filepath.Join(dataPath, "signed-in-by-toolkit")
-		if _, err := os.Stat(toolkitMarker); code == "" && err != nil {
-			code = askToolkitForCode("traverse")
-		}
-		if code != "" && !reachable() {
-			code = ""
-		}
-		if code != "" {
-			os.WriteFile(toolkitMarker, []byte(time.Now().Format(time.RFC3339)), 0o644)
-		}
-		w.Navigate(firstURL(code))
-	} else {
-		w.SetHtml(strings.ReplaceAll(offlinePage, "{{APP_URL}}", startURL))
-	}
+	// the start screen while it finds out where to open (online, the Toolkit's sign-in)
+	w.SetHtml(splashPage(appName))
+	go func() {
+		open := whereToOpen(dataPath, marker)
+		w.Dispatch(func() { open(w) })
+	}()
 	w.Run()
 }

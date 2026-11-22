@@ -106,8 +106,17 @@ func main() {
 		os.WriteFile(marker, []byte(time.Now().Format(time.RFC3339)), 0o644)
 		// the Toolkit's code needs the website; offline, the app's own copy opens as before
 		code := signInCode(os.Args[1:])
+		// opened from a shortcut: the Survey Toolkit on this PC, if it is signed in, gives a code for
+		// its account, once (the website leaves a sign-in the window already has as it is)
+		toolkitMarker := filepath.Join(dataPath, "signed-in-by-toolkit")
+		if _, err := os.Stat(toolkitMarker); code == "" && err != nil {
+			code = askToolkitForCode("traverse")
+		}
 		if code != "" && !reachable() {
 			code = ""
+		}
+		if code != "" {
+			os.WriteFile(toolkitMarker, []byte(time.Now().Format(time.RFC3339)), 0o644)
 		}
 		w.Navigate(firstURL(code))
 	} else {

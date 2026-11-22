@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{{NAME}}</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #0A1A36; color: #fff; font-family: "Segoe UI", system-ui, sans-serif; cursor: progress; user-select: none; }
+  body { display: flex; align-items: center; justify-content: center; }
+  .box { text-align: center; }
+  img { width: 88px; height: 88px; display: block; margin: 0 auto 18px; }
+  h1 { margin: 0; font-size: 24px; font-weight: 600; }
+  p { margin: 6px 0 22px; font-size: 14px; color: #A9B8D3; }
+  .bar { width: 220px; height: 4px; margin: 0 auto; background: #17386B; border-radius: 2px; overflow: hidden; }
+  .bar i { display: block; width: 33%; height: 100%; background: #5B9BFF; border-radius: 2px; animation: go 1.2s ease-in-out infinite; }
+  @keyframes go { from { transform: translateX(-100%); } to { transform: translateX(300%); } }
+</style>
+</head>
+<body>
+  <div class="box" role="status" aria-label="{{NAME}} is starting">
+    <img src="{{ICON}}" alt="">
+    <h1>{{NAME}}</h1>
+    <p>Starting&hellip;</p>
+    <div class="bar"><i></i></div>
+  </div>
+</body>
+</html>

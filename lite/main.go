@@ -8,8 +8,10 @@ package main
 import (
 	_ "embed"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"syscall"
 	"time"
@@ -25,6 +27,26 @@ const (
 	// already signed in)
 	startURL = appURL + "?app=1"
 )
+
+// signInCode is the one-use code the Survey Toolkit passed (--signin-code=…), or "".
+func signInCode(args []string) string {
+	ok := regexp.MustCompile(`^[0-9a-f]{64}$`)
+	for _, a := range args {
+		if c, found := strings.CutPrefix(a, "--signin-code="); found && ok.MatchString(c) {
+			return c
+		}
+	}
+	return ""
+}
+
+// firstURL is where the window opens: opened from the Survey Toolkit, through the website's
+// sign-in with the Toolkit's code (it goes on to the app, signed in to the same account).
+func firstURL(code string) string {
+	if code == "" {
+		return startURL
+	}
+	return "https://www.exceltokml.com/api/toolkit/app-code/redeem?app=traverse&code=" + url.QueryEscape(code)
+}
 
 // shown only when the web app has never been opened on this computer and there is no internet
 //
@@ -82,7 +104,12 @@ func main() {
 	if _, err := os.Stat(marker); err == nil || reachable() {
 		os.MkdirAll(dataPath, 0o755)
 		os.WriteFile(marker, []byte(time.Now().Format(time.RFC3339)), 0o644)
-		w.Navigate(startURL)
+		// the Toolkit's code needs the website; offline, the app's own copy opens as before
+		code := signInCode(os.Args[1:])
+		if code != "" && !reachable() {
+			code = ""
+		}
+		w.Navigate(firstURL(code))
 	} else {
 		w.SetHtml(strings.ReplaceAll(offlinePage, "{{APP_URL}}", startURL))
 	}

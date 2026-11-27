@@ -102,6 +102,7 @@ func whereToOpen(dataPath, marker string) func(webview2.WebView) {
 }
 
 func main() {
+	defer stopOnPanic()
 	// a fixed data folder: the sign-in, the offline copy of the app and the jobs waiting to
 	// upload are kept here, so they survive restarts and updates
 	dataPath := filepath.Join(os.Getenv("AppData"), "TraverseLevel")
@@ -126,11 +127,23 @@ func main() {
 	}
 	defer w.Destroy()
 
-	go checkForUpdate(w)
+	// Help in the app: the error log, the open-source licences, and pages in the browser;
+	// the page's own errors go into the log
+	w.Bind("kmlOpenUrl", func(u string) error { return openURL(u) })
+	w.Bind("kmlOpenLog", func() error { return openLogFolder() })
+	w.Bind("kmlOpenNotices", func() error { return openNotices() })
+	w.Bind("kmlLogError", func(t string) { logError("the page: " + t) })
+	w.Init(pageErrorScript)
+
+	go func() {
+		defer stopOnPanic()
+		checkForUpdate(w)
+	}()
 
 	// the start screen while it finds out where to open (online, the Toolkit's sign-in)
 	w.SetHtml(splashPage(appName))
 	go func() {
+		defer stopOnPanic()
 		open := whereToOpen(dataPath, marker)
 		w.Dispatch(func() { open(w) })
 	}()

@@ -19,7 +19,9 @@
     "FileVersion": "2.1.1",
     "ProductVersion": "2.1.1",
     "InternalName": "TraverseLevel",
-    "OriginalFilename": "TraverseLevel.exe"
+    "OriginalFilename": "TraverseLevel.exe",
+    "CompanyName": "exceltokml.com",
+    "LegalCopyright": "Copyright (c) 2026 Asjad Mehmood"
   },
   "VarFileInfo": {
     "Translation": {

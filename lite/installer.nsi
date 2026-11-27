@@ -33,6 +33,7 @@ VIAddVersionKey "ProductName" "Traverse & Level"
 VIAddVersionKey "FileDescription" "Traverse & Level installer"
 VIAddVersionKey "FileVersion" "${VERSION}"
 VIAddVersionKey "ProductVersion" "${VERSION}"
+VIAddVersionKey "CompanyName" "exceltokml.com"
 VIAddVersionKey "LegalCopyright" "Copyright (c) 2026 Asjad Mehmood"
 
 Section "Install"
@@ -63,6 +64,7 @@ Section "Install"
   SetOutPath "$INSTDIR"
   File "TraverseLevel.exe"
   File "icon.ico"
+  File "THIRD-PARTY-NOTICES.txt"
 
   ; Traverse Pro 1.x shortcuts
   Delete "$SMPROGRAMS\Traverse Pro\Traverse Pro.lnk"
@@ -81,9 +83,17 @@ Section "Install"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TraversePro" \
               "DisplayVersion" "${VERSION}"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TraversePro" \
-              "Publisher" "SurveyX Digital"
+              "Publisher" "exceltokml.com"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TraversePro" \
               "DisplayIcon" "$INSTDIR\icon.ico"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TraversePro" \
+              "URLInfoAbout" "https://www.exceltokml.com/traverse"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TraversePro" \
+              "HelpLink" "https://www.exceltokml.com/contact"
+  ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
+  IntFmt $0 "0x%08X" $0
+  WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TraversePro" \
+              "EstimatedSize" "$0"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TraversePro" \
               "UninstallString" "$INSTDIR\Uninstall.exe"
   WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TraversePro" \
@@ -105,6 +115,8 @@ Section "Uninstall"
   Delete "$INSTDIR\TraverseLevel.exe"
   Delete "$INSTDIR\TraversePro.exe"
   Delete "$INSTDIR\icon.ico"
+  Delete "$INSTDIR\THIRD-PARTY-NOTICES.txt"
+  RMDir /r "$INSTDIR\logs"
   Delete "$INSTDIR\Uninstall.exe"
   RMDir "$INSTDIR"
   Delete "$SMPROGRAMS\Traverse & Level\Traverse & Level.lnk"

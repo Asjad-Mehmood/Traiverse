@@ -116,7 +116,9 @@ func main() {
 			Title:  "Professional Traverse and Level Adjustment Software",
 			Width:  1440,
 			Height: 920,
-			IconId: 2,
+			// the program's icon in the title bar: IDI_APPLICATION (32512), the icon group goversioninfo
+			// (pinned in the release workflow) writes from icon.ico. Not 2: that is one of its images.
+			IconId: 32512,
 			Center: true,
 		},
 	})

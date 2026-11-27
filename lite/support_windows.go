@@ -64,7 +64,7 @@ func stopOnPanic() {
 	logError(fmt.Sprintf("the program stopped: %v\n%s", r, debug.Stack()))
 	warn("Traverse & Level stopped because of an error. We're sorry.\n\n" +
 		"The details are in " + filepath.Join(logDir(), "errors.log") + ".\n\n" +
-		"Please tell us at www.exceltokml.com/contact (Help → Report a problem) and attach that file. " +
+		"Please tell us at www.surveyxdigital.com/contact (Help → Report a problem) and attach that file. " +
 		"Your jobs are kept.")
 	os.Exit(1)
 }
@@ -72,7 +72,8 @@ func stopOnPanic() {
 // openURL opens one of the website's pages in the default browser. The window shows the
 // website, so only its own pages open: nothing else can be started from it.
 func openURL(u string) error {
-	if !strings.HasPrefix(u, "https://www.exceltokml.com/") || strings.ContainsAny(u, "\"\r\n ") {
+	site := strings.HasPrefix(u, "https://www.surveyxdigital.com/") || strings.HasPrefix(u, "https://www.exceltokml.com/")
+	if !site || strings.ContainsAny(u, "\"\r\n ") {
 		return errors.New("only the website's pages open")
 	}
 	return exec.Command("rundll32", "url.dll,FileProtocolHandler", u).Start()

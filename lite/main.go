@@ -27,7 +27,7 @@ const (
 	// app and the jobs waiting to upload per address, so moving it to www.surveyxdigital.com
 	// would leave them behind. exceltokml.com keeps answering for these paths (docs: the moved
 	// site forwards /traverse/app and /api). A later version moves it, with the data.
-	appURL  = "https://www.exceltokml.com/traverse/app"
+	appURL = "https://www.exceltokml.com/traverse/app"
 	// ?app=1 opens it as an app: no front page, straight to log in (or the dashboard when
 	// already signed in)
 	startURL = appURL + "?app=1"

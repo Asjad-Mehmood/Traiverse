@@ -33,8 +33,8 @@ VIAddVersionKey "ProductName" "Traverse & Level"
 VIAddVersionKey "FileDescription" "Traverse & Level installer"
 VIAddVersionKey "FileVersion" "${VERSION}"
 VIAddVersionKey "ProductVersion" "${VERSION}"
-VIAddVersionKey "CompanyName" "exceltokml.com"
-VIAddVersionKey "LegalCopyright" "Copyright (c) 2026 Asjad Mehmood"
+VIAddVersionKey "CompanyName" "SurveyX Digital"
+VIAddVersionKey "LegalCopyright" "Copyright (c) 2026 SurveyX Digital"
 
 Section "Install"
   ; Windows will not overwrite a running program, so clear the way first
@@ -83,13 +83,13 @@ Section "Install"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TraversePro" \
               "DisplayVersion" "${VERSION}"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TraversePro" \
-              "Publisher" "exceltokml.com"
+              "Publisher" "SurveyX Digital"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TraversePro" \
               "DisplayIcon" "$INSTDIR\icon.ico"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TraversePro" \
-              "URLInfoAbout" "https://www.exceltokml.com/traverse"
+              "URLInfoAbout" "https://www.surveyxdigital.com/traverse"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TraversePro" \
-              "HelpLink" "https://www.exceltokml.com/contact"
+              "HelpLink" "https://www.surveyxdigital.com/contact"
   ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
   IntFmt $0 "0x%08X" $0
   WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TraversePro" \

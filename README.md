@@ -4,13 +4,13 @@
 
 Enter the coordinates you measure on site, or the angles and distances from your field book, close
 on a known point and get an adjusted, checked result with a signed PDF report. Level books are
-reduced, checked and adjusted the same way. Every job is saved to your Excel to KML account, ready to open, copy or share.
+reduced, checked and adjusted the same way. Every job is saved to your SurveyX Digital account, ready to open, copy or share.
 
 <img src="app/icon-512.png" alt="" width="96">
 
 [Download for Windows](https://github.com/Asjad-Mehmood/Traiverse/releases/latest/download/TraverseLevel-Setup.exe) ·
-[Open the web app](https://www.exceltokml.com/traverse/app) ·
-[Product page and manual](https://www.exceltokml.com/traverse) ·
+[Open the web app](https://www.surveyxdigital.com/traverse/app) ·
+[Product page and manual](https://www.surveyxdigital.com/traverse) ·
 [Report a problem](https://github.com/Asjad-Mehmood/Traiverse/issues)
 
 ---
@@ -33,17 +33,17 @@ reduced, checked and adjusted the same way. Every job is saved to your Excel to 
 - **Dashboard, sharing and a traverse simulator** for training.
 - **Offline, dark mode and phone.** After the first login it also opens without internet.
 
-The full step-by-step manual is on the [product page](https://www.exceltokml.com/traverse).
+The full step-by-step manual is on the [product page](https://www.surveyxdigital.com/traverse).
 
 ## The Windows program
 
 The program is a window onto the web app at
-[www.exceltokml.com/traverse/app](https://www.exceltokml.com/traverse/app), in its own Start
+[www.exceltokml.com/traverse/app](https://www.surveyxdigital.com/traverse/app), in its own Start
 menu entry and desktop shortcut, so the program and the website always match. New app features,
 such as the field book, least squares and Qatar National Grid of version 2.1, reach the program
 without a new installer:
 
-- **Log in with your Excel to KML account.** The same account as the website, and the same jobs.
+- **Log in with your SurveyX Digital account.** The same account as the website, and the same jobs.
 - **Jobs are saved to your account** and appear in the web app and on your phone too.
 - **Offline.** Open it once with internet. After that it opens without a connection; jobs saved
   offline upload by themselves when the connection is back.

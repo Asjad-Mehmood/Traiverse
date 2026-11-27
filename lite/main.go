@@ -1,7 +1,8 @@
 // Traverse & Level - lightweight Windows shell.
 // Uses the WebView2 runtime that ships with Windows 10 and 11, so the program itself stays
-// small. The window opens the web app at www.exceltokml.com/traverse/app, so the user signs in
-// with their Excel to KML account and every job is saved to that account. After the first
+// small. The window opens the web app at www.exceltokml.com/traverse/app (the website, now
+// www.surveyxdigital.com, under its old address), so the user signs in
+// with their SurveyX Digital account and every job is saved to that account. After the first
 // visit the web app keeps its files on this computer, so the window also opens offline.
 package main
 
@@ -22,7 +23,11 @@ import (
 
 const (
 	appName = "Traverse & Level"
-	appURL  = "https://www.exceltokml.com/traverse/app"
+	// Still the old address on purpose: the window keeps the sign-in, the offline copy of the
+	// app and the jobs waiting to upload per address, so moving it to www.surveyxdigital.com
+	// would leave them behind. exceltokml.com keeps answering for these paths (docs: the moved
+	// site forwards /traverse/app and /api). A later version moves it, with the data.
+	appURL = "https://www.exceltokml.com/traverse/app"
 	// ?app=1 opens it as an app: no front page, straight to log in (or the dashboard when
 	// already signed in)
 	startURL = appURL + "?app=1"
